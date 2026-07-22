@@ -394,11 +394,18 @@
     .empty svg{margin:0 auto 14px;opacity:.35;display:block;}
     .empty p{font-size:0.87rem;}
 
-    /* ─── PRICE HINT ─────────────────────────────── */
+    /* ─── PRICE HINT & SACK CHIPS ────────────────── */
     .price-hint{
       font-size:0.72rem;color:var(--accent);font-weight:700;
       margin-top:2px;min-height:14px;
     }
+    .sack-chip{
+      display:inline-flex;align-items:center;gap:6px;
+      background:var(--input-bg);border:1px solid rgba(16,185,129,0.35);
+      border-radius:16px;padding:4px 10px;font-size:0.82rem;color:var(--text);
+      transition:var(--tr);animation:fadeIn .15s ease;
+    }
+    .sack-chip:hover{border-color:var(--primary);}
 
     /* ─── UTILITIES ──────────────────────────────── */
     .mt-3{margin-top:12px;} .mt-4{margin-top:16px;} .mt-2{margin-top:8px;}
@@ -430,6 +437,9 @@
       #content-transport{display:none!important;}
       .card-title svg{color:#10b981;}
       .section-lbl{color:#059669;}
+      .overlay.open{position:absolute;inset:0;background:#fff;color:#111;padding:0;opacity:1;pointer-events:all;z-index:9999;}
+      .overlay.open .modal{background:#fff;color:#111;border:1px solid #ccc;max-width:100%!important;max-height:none!important;box-shadow:none;transform:none;padding:16px;}
+      .overlay.open .modal-foot{display:none!important;}
     }
   </style>
 </head>
@@ -532,7 +542,9 @@
           </div>
           <div class="row-total-lbl" id="pr-tdsp-1">0 KHR</div>
         </div>
-        <div class="fg fg-3" style="margin-bottom:11px;">
+
+        <!-- Variety, Grade, Price -->
+        <div class="fg fg-3" style="margin-bottom:14px;">
           <div class="fgroup">
             <label>Variety</label>
             <select id="pr-var-1" onchange="onVariety(1)">
@@ -547,22 +559,46 @@
             <select id="pr-grd-1" onchange="onGrade(1)"><option value="">— Select Variety First —</option></select>
           </div>
           <div class="fgroup">
-            <label>Number of Sacks</label>
-            <input type="number" id="pr-sacks-1" placeholder="0" min="0" step="1" oninput="calcRow(1)">
-          </div>
-        </div>
-        <div class="fg fg-3">
-          <div class="fgroup">
             <label>Unit Price (KHR/kg)</label>
             <input type="number" id="pr-prc-1" placeholder="0" min="0" step="0.5" oninput="calcRow(1)">
             <div class="price-hint" id="pr-phint-1"></div>
           </div>
+        </div>
+
+        <!-- Per-Sack Weight Entry -->
+        <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+            <div style="font-size:0.75rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:0.05em; display:flex; align-items:center; gap:6px;">
+              <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+              Sack Weighing Entry (Weigh One by One)
+            </div>
+            <button type="button" class="btn btn-secondary btn-xs" onclick="clearSacks(1)" style="font-size:0.72rem;">Clear All Sacks</button>
+          </div>
+          <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:180px;">
+              <input type="text" id="pr-sack-input-1" placeholder="Enter weight in kg (e.g. 85 or 85, 83, 80)" onkeydown="if(event.key==='Enter'){event.preventDefault();addSackFromInput(1);}" style="font-size:0.9rem;">
+            </div>
+            <button type="button" class="btn btn-primary btn-sm" onclick="addSackFromInput(1)">
+              <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+              Add Sack
+            </button>
+          </div>
+          <div id="pr-sacks-list-1" style="display:flex; flex-wrap:wrap; gap:8px; min-height:42px; align-items:center; padding:8px; background:rgba(0,0,0,0.2); border-radius:8px; border:1px dashed var(--input-bdr);">
+          </div>
+        </div>
+
+        <!-- Auto-Calculated Totals -->
+        <div class="fg fg-3">
           <div class="fgroup">
-            <label>Quantity (kg)</label>
-            <input type="number" id="pr-qty-1" placeholder="0.00" min="0" step="0.01" oninput="calcRow(1)">
+            <label>Number of Sacks (Auto)</label>
+            <input type="number" id="pr-sacks-1" readonly placeholder="0" style="color:var(--accent); font-weight:800; cursor:default;">
           </div>
           <div class="fgroup">
-            <label>Paddy Value (KHR)</label>
+            <label>Total Quantity (kg) (Auto)</label>
+            <input type="number" id="pr-qty-1" readonly placeholder="0.00" style="color:var(--accent); font-weight:800; cursor:default;">
+          </div>
+          <div class="fgroup">
+            <label>Paddy Value (KHR) (Auto)</label>
             <input type="text" id="pr-tot-1" readonly placeholder="—">
           </div>
         </div>
@@ -897,6 +933,31 @@
   </div>
 </div>
 
+<!-- ── TRANSPORT DETAILS MODAL ───────────────────────── -->
+<div class="overlay" id="transport-details-modal">
+  <div class="modal" style="max-width:850px;">
+    <div class="modal-title" style="justify-content:space-between; align-items:center;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+        </svg>
+        <span>Transport Record Manifest &amp; Loaded Purchases</span>
+      </div>
+      <button class="btn btn-secondary btn-xs" onclick="closeTransportDetails()">✕</button>
+    </div>
+    
+    <div id="td-modal-body" style="display:flex;flex-direction:column;gap:14px;"></div>
+    
+    <div class="modal-foot" style="justify-content:space-between; align-items:center;">
+      <div style="font-size:0.78rem;color:var(--muted);" id="td-modal-foot-info"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ Print Manifest</button>
+        <button class="btn btn-primary btn-sm" onclick="closeTransportDetails()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ── TOASTS ─────────────────────────────────────── -->
 <div class="toast-wrap" id="toasts"></div>
 
@@ -927,6 +988,7 @@ let sigPads = {};
 let confirmCb = null;
 let importSel = new Set();
 let rowSeq = 0;
+let sackWeights = [];
 
 /* ── INIT ────────────────────────────────────────── */
 window.addEventListener('DOMContentLoaded', () => {
@@ -944,6 +1006,7 @@ window.addEventListener('DOMContentLoaded', () => {
   renderTRows();
   renderPH();
   renderTH();
+  updateSackTotals(1);
 });
 
 /* ── TAB SWITCHING ───────────────────────────────── */
@@ -1104,6 +1167,71 @@ function calcTotals() {
   document.getElementById('pr-grand').textContent = fmtKHR(grandTotal);
 }
 
+/* ── SACK WEIGHING LOGIC ─────────────────────────── */
+function addSackFromInput(row) {
+  const input = document.getElementById('pr-sack-input-' + row);
+  if (!input) return;
+  const str = input.value.trim();
+  if (!str) return;
+
+  const tokens = str.split(/[\s,]+/);
+  let addedCount = 0;
+  tokens.forEach(t => {
+    const val = parseFloat(t);
+    if (!isNaN(val) && val > 0) {
+      sackWeights.push(val);
+      addedCount++;
+    }
+  });
+
+  input.value = '';
+  if (addedCount > 0) {
+    updateSackTotals(row);
+  } else {
+    toast('Please enter a valid weight in kg.', 'err');
+  }
+}
+
+function removeSackWeight(row, index) {
+  if (index >= 0 && index < sackWeights.length) {
+    sackWeights.splice(index, 1);
+    updateSackTotals(row);
+  }
+}
+
+function clearSacks(row) {
+  sackWeights = [];
+  updateSackTotals(row);
+}
+
+function updateSackTotals(row) {
+  const sacksEl = document.getElementById('pr-sacks-' + row);
+  const qtyEl = document.getElementById('pr-qty-' + row);
+  const listEl = document.getElementById('pr-sacks-list-' + row);
+
+  const count = sackWeights.length;
+  const totalWeight = sackWeights.reduce((s, w) => s + w, 0);
+
+  if (sacksEl) sacksEl.value = count > 0 ? count : '';
+  if (qtyEl) qtyEl.value = totalWeight > 0 ? totalWeight.toFixed(2) : '';
+
+  if (listEl) {
+    if (count === 0) {
+      listEl.innerHTML = `<span style="font-size:0.8rem; color:var(--muted); font-style:italic;">No sacks weighed yet. Type a weight above and press Enter.</span>`;
+    } else {
+      listEl.innerHTML = sackWeights.map((w, idx) => `
+        <div class="sack-chip">
+          <span style="color:var(--muted); font-size:0.75rem; font-weight:700;">#${idx + 1}</span>
+          <strong style="color:var(--accent); font-size:0.85rem;">${w.toFixed(1)} kg</strong>
+          <button type="button" onclick="removeSackWeight(${row}, ${idx})" style="background:none; border:none; color:var(--danger); font-size:0.9rem; cursor:pointer; padding:0 2px; line-height:1;" title="Remove sack">✕</button>
+        </div>
+      `).join('');
+    }
+  }
+
+  calcRow(row);
+}
+
 /* ── SAVE PURCHASE ───────────────────────────────── */
 function savePurchase() {
   const name = document.getElementById('p-name').value.trim();
@@ -1116,6 +1244,12 @@ function savePurchase() {
   const paddySacks = parseInt(document.getElementById('pr-sacks-1').value) || 0;
   const paddyPrice = parseFloat(document.getElementById('pr-prc-1').value) || 0;
   const paddyWeight = parseFloat(document.getElementById('pr-qty-1').value) || 0;
+  
+  if(!paddyVariety){ toast('Please select Paddy Variety.','err'); return; }
+  if(!paddySacks || paddySacks <= 0 || !paddyWeight || paddyWeight <= 0){
+    toast('Please weigh at least one sack.','err'); return;
+  }
+
   const seedBorrowed = parseFloat(document.getElementById('pr-seed-borrowed').value) || 0;
   const seedRepayQty = seedBorrowed * 1.10;
   const seedDeduction = seedRepayQty * paddyPrice;
@@ -1130,6 +1264,7 @@ function savePurchase() {
       unitPrice: paddyPrice,
       quantity: paddyWeight,
       sacks: paddySacks,
+      sackWeights: [...sackWeights],
       total: paddyPrice * paddyWeight
     }
   ];
@@ -1159,6 +1294,7 @@ function savePurchase() {
   purchaseRecs.unshift(rec);
   saveData();
   renderPH();
+  resetPurchase();
   toast('✅ Purchase record saved!','ok');
 }
 
@@ -1175,9 +1311,8 @@ function resetPurchase(){
   
   document.getElementById('pr-var-1').value='';
   document.getElementById('pr-grd-1').innerHTML='<option value="">— Select Variety First —</option>';
-  document.getElementById('pr-sacks-1').value='';
+  clearSacks(1);
   document.getElementById('pr-prc-1').value='';
-  document.getElementById('pr-qty-1').value='';
   document.getElementById('pr-tot-1').value='';
   document.getElementById('pr-tdsp-1').textContent='0 KHR';
   clearPriceHint(1);
@@ -1389,10 +1524,24 @@ function doImport(){
   importSel.forEach(id=>{
     const rec = purchaseRecs.find(r=>r.id===id);
     if(!rec) return;
+    const origIndex = purchaseRecs.findIndex(pr => pr.id === rec.id);
+    const recNum = purchaseRecs.length - origIndex;
     rec.items.forEach(it=>{
       if(!it.variety||!it.quantity) return;
       if(tRows.length>=16) return;
-      addTRowData({ variety:it.variety, familyCode:rec.familyCode, village:rec.village||'', sacks:it.sacks||'', weight:it.quantity, purchaseRecordId:rec.id });
+      const lotVal = (it.unitPrice && it.quantity) ? (it.unitPrice * it.quantity) : (rec.totalPayment || 0);
+      addTRowData({
+        variety: it.variety,
+        familyCode: rec.familyCode,
+        village: rec.village||'',
+        sacks: it.sacks||'',
+        weight: it.quantity,
+        purchaseRecordId: rec.id,
+        purchaseRecNum: '#' + recNum,
+        farmerName: rec.producerName,
+        unitPrice: it.unitPrice || 0,
+        totalValue: lotVal
+      });
       added++;
     });
   });
@@ -1409,9 +1558,16 @@ function saveTransport(){
   if(!date||!driver||!plate){ toast('Please fill Date, Driver Name, and Plate Number.','err'); return; }
 
   const rows = tRows.map(r=>({
-    variety:r.variety||'', familyCode:r.familyCode||'', village:r.village||'',
-    sacks: parseInt(r.sacks)||0, weight: parseFloat(r.weight)||0,
-    purchaseRecordId: r.purchaseRecordId||null
+    variety: r.variety||'',
+    familyCode: r.familyCode||'',
+    village: r.village||'',
+    sacks: parseInt(r.sacks)||0,
+    weight: parseFloat(r.weight)||0,
+    purchaseRecordId: r.purchaseRecordId||null,
+    purchaseRecNum: r.purchaseRecNum||'',
+    farmerName: r.farmerName||'',
+    unitPrice: parseFloat(r.unitPrice)||0,
+    totalValue: parseFloat(r.totalValue)||0
   })).filter(r=>r.variety||r.weight>0);
 
   const rec = {
@@ -1493,7 +1649,171 @@ function tRecCard(r){
       ${r.fieldStaff?`<div class="rec-stat" style="font-size:0.73rem;color:var(--muted);">👤 Staff: ${esc(r.fieldStaff)} (${r.fieldStaffTime||'—'})<br>Witness: ${esc(r.driverWitness)} (${r.driverWitnessTime||'—'})</div>`:''}
       ${r.mobile?`<div class="rec-stat" style="font-size:0.73rem;">📱 ${esc(r.mobile)}</div>`:''}
     </div>
+    <div style="margin-top:10px; padding-top:8px; border-top:1px solid var(--border); display:flex; justify-content:flex-end;">
+      <button class="btn btn-gold btn-xs" onclick="viewTransportDetails('${r.id}')">
+        <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+        View Details
+      </button>
+    </div>
   </div>`;
+}
+
+/* ── VIEW TRANSPORT DETAILS ──────────────────────── */
+function viewTransportDetails(id) {
+  const rec = transportRecs.find(t => t.id === id);
+  if (!rec) { toast('Transport record not found.', 'err'); return; }
+
+  const dt = fmtDate(rec.date);
+
+  let grandTotalValue = 0;
+  const processedRows = rec.rows.map((row, idx) => {
+    let pRec = null;
+    if (row.purchaseRecordId) {
+      pRec = purchaseRecs.find(p => p.id === row.purchaseRecordId);
+    }
+    if (!pRec && row.familyCode) {
+      pRec = purchaseRecs.find(p => p.familyCode && p.familyCode.toLowerCase() === row.familyCode.toLowerCase());
+    }
+
+    let recNumStr = '—';
+    if (pRec) {
+      const origIndex = purchaseRecs.findIndex(pr => pr.id === pRec.id);
+      recNumStr = '#' + (purchaseRecs.length - origIndex);
+    } else if (row.purchaseRecNum) {
+      recNumStr = row.purchaseRecNum;
+    }
+
+    const farmerName = (pRec && pRec.producerName) ? pRec.producerName : (row.farmerName || '—');
+    const familyCode = row.familyCode || (pRec ? pRec.familyCode : '—');
+    const village = row.village || (pRec ? pRec.village : '—');
+
+    let varietyStr = row.variety || '—';
+    if (pRec && pRec.items && pRec.items[0] && pRec.items[0].grade) {
+      varietyStr += ` (${pRec.items[0].grade})`;
+    }
+
+    const sacks = row.sacks || 0;
+    const weight = parseFloat(row.weight) || 0;
+
+    let val = 0;
+    if (row.totalValue && row.totalValue > 0) {
+      val = row.totalValue;
+    } else if (pRec) {
+      const matched = (pRec.items || []).find(i => i.variety === row.variety) || (pRec.items || [])[0];
+      if (matched && matched.unitPrice && weight > 0) {
+        val = matched.unitPrice * weight;
+      } else {
+        val = pRec.totalPayment || 0;
+      }
+    } else if (row.unitPrice && row.unitPrice > 0 && weight > 0) {
+      val = row.unitPrice * weight;
+    } else if (row.variety && SPECS[row.variety] && weight > 0) {
+      const spec = SPECS[row.variety];
+      const basePrice = (spec && spec.prices) ? (Object.values(spec.prices)[0] || 0) : 0;
+      const finalPrice = basePrice > 0 ? basePrice + ORGANIC_BONUS : 0;
+      val = finalPrice * weight;
+    }
+
+    grandTotalValue += val;
+
+    return {
+      index: idx + 1,
+      recNumStr,
+      farmerName,
+      familyCode,
+      village,
+      varietyStr,
+      sacks,
+      weight,
+      val,
+      valStr: val > 0 ? fmtKHR(val) : '—'
+    };
+  });
+
+  const bodyEl = document.getElementById('td-modal-body');
+  
+  const cleanStatus = rec.truckCleaned 
+    ? `<span style="color:var(--accent);font-weight:700;">✅ Cleaned Prior to Loading</span>`
+    : `<span style="color:var(--muted);">⚠️ Cleaning Not Confirmed</span>`;
+
+  bodyEl.innerHTML = `
+    <div style="background:rgba(255,255,255,0.025);border:1px solid var(--border);border-radius:10px;padding:14px;display:grid;grid-template-columns:1fr;gap:12px;" class="fg-3">
+      <div>
+        <div style="font-size:0.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Truck & Driver</div>
+        <div style="font-weight:800;font-size:1rem;color:#fff;margin-top:2px;">🚛 ${esc(rec.driver)}</div>
+        <div style="font-size:0.8rem;color:var(--accent);">${esc(rec.plate)} ${rec.mobile ? '· 📱 ' + esc(rec.mobile) : ''}</div>
+      </div>
+      <div>
+        <div style="font-size:0.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Transport Details</div>
+        <div style="font-size:0.85rem;color:var(--text);margin-top:2px;">📅 Date: <strong>${dt}</strong></div>
+        <div style="font-size:0.8rem;margin-top:2px;">${cleanStatus}</div>
+      </div>
+      <div>
+        <div style="font-size:0.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Responsible Staff & Witness</div>
+        <div style="font-size:0.8rem;color:var(--text);margin-top:2px;">👤 Staff: <strong>${esc(rec.fieldStaff || '—')}</strong> ${rec.fieldStaffTime ? '(' + rec.fieldStaffTime + ')' : ''}</div>
+        <div style="font-size:0.8rem;color:var(--text);margin-top:2px;">👁️ Witness: <strong>${esc(rec.driverWitness || '—')}</strong> ${rec.driverWitnessTime ? '(' + rec.driverWitnessTime + ')' : ''}</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+      <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:0.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Total Lots</div>
+        <div style="font-weight:800;font-size:1.1rem;color:#fff;">${processedRows.length}</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:0.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Total Sacks</div>
+        <div style="font-weight:800;font-size:1.1rem;color:#fff;">${rec.totalSacks || 0}</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:0.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Total Weight</div>
+        <div style="font-weight:800;font-size:1.1rem;color:var(--accent);">${(rec.totalWeight || 0).toFixed(2)} kg</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center;">
+        <div style="font-size:0.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Total Value (KHR)</div>
+        <div style="font-weight:800;font-size:1.1rem;color:var(--gold);">${fmtKHR(grandTotalValue)}</div>
+      </div>
+    </div>
+
+    <div style="overflow-x:auto;border:1px solid var(--border);border-radius:10px;">
+      <table class="t-table" style="margin:0;width:100%;">
+        <thead>
+          <tr style="background:var(--input-bg);">
+            <th style="padding:10px 12px;font-size:0.75rem;text-align:center;">#</th>
+            <th style="padding:10px 12px;font-size:0.75rem;">Rec #</th>
+            <th style="padding:10px 12px;font-size:0.75rem;">Farmer Name</th>
+            <th style="padding:10px 12px;font-size:0.75rem;">Family ID</th>
+            <th style="padding:10px 12px;font-size:0.75rem;">Village</th>
+            <th style="padding:10px 12px;font-size:0.75rem;">Rice Variety</th>
+            <th style="padding:10px 12px;font-size:0.75rem;text-align:right;">Sacks</th>
+            <th style="padding:10px 12px;font-size:0.75rem;text-align:right;">Weight (kg)</th>
+            <th style="padding:10px 12px;font-size:0.75rem;text-align:right;">Total Value (KHR)</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${processedRows.map(r => `
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:10px 12px;font-size:0.8rem;text-align:center;color:var(--muted);">${r.index}</td>
+              <td style="padding:10px 12px;font-size:0.82rem;font-weight:700;color:var(--primary);">${esc(r.recNumStr)}</td>
+              <td style="padding:10px 12px;font-size:0.84rem;font-weight:700;color:var(--text);">${esc(r.farmerName)}</td>
+              <td style="padding:10px 12px;font-size:0.82rem;color:var(--muted);">${esc(r.familyCode)}</td>
+              <td style="padding:10px 12px;font-size:0.82rem;color:var(--muted);">${esc(r.village)}</td>
+              <td style="padding:10px 12px;font-size:0.82rem;color:var(--text);">${esc(r.varietyStr)}</td>
+              <td style="padding:10px 12px;font-size:0.84rem;text-align:right;font-weight:600;">${r.sacks}</td>
+              <td style="padding:10px 12px;font-size:0.84rem;text-align:right;font-weight:700;color:var(--accent);">${r.weight.toFixed(2)}</td>
+              <td style="padding:10px 12px;font-size:0.84rem;text-align:right;font-weight:800;color:var(--gold);">${r.valStr}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  document.getElementById('td-modal-foot-info').textContent = `Transport ID: ${rec.id} · Recorded: ${fmtDate(rec.createdAt || rec.date)}`;
+  document.getElementById('transport-details-modal').classList.add('open');
+}
+
+function closeTransportDetails() {
+  document.getElementById('transport-details-modal').classList.remove('open');
 }
 
 /* ── CSV EXPORTS ─────────────────────────────────── */
@@ -1575,8 +1895,17 @@ function confirmClear(type){
 }
 
 /* Close overlays on background click */
-['import-modal','confirm-modal'].forEach(id=>{
-  document.getElementById(id).addEventListener('click',function(e){ if(e.target===this){ if(id==='import-modal') closeImport(); else closeConfirm(); }});
+['import-modal','confirm-modal','transport-details-modal'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(el){
+    el.addEventListener('click',function(e){
+      if(e.target===this){
+        if(id==='import-modal') closeImport();
+        else if(id==='transport-details-modal') closeTransportDetails();
+        else closeConfirm();
+      }
+    });
+  }
 });
 
 /* ── TOAST ───────────────────────────────────────── */
