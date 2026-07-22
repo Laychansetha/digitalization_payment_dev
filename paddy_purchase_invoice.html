@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="description" content="IBIS Rice Conservation Co., Ltd – Digital Paddy Purchase Invoice System for field operations">
+  <title>IBIS RICE – Paddy Purchase Invoice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ================================================
+       DESIGN TOKENS — matching specs_checking_record.html
+       ================================================ */
+    :root {
+      --bg:         #0b0f19;
+      --panel:      #141c2f;
+      --panel2:     #1a2440;
+      --border:     rgba(255,255,255,0.08);
+      --primary:    #10b981;
+      --primary-h:  #059669;
+      --accent:     #34d399;
+      --gold:       #f59e0b;
+      --gold-bg:    rgba(245,158,11,0.12);
+      --gold-border:rgba(245,158,11,0.25);
+      --text:       #f8fafc;
+      --muted:      #94a3b8;
+      --danger:     #ef4444;
+      --danger-bg:  rgba(239,68,68,0.12);
+      --success:    #10b981;
+      --success-bg: rgba(16,185,129,0.12);
+      --warning:    #f59e0b;
+      --warning-bg: rgba(245,158,11,0.12);
+      --info-bg:    rgba(99,102,241,0.12);
+      --info:       #a5b4fc;
+      --input-bg:   #1e293b;
+      --input-bdr:  #334155;
+      --input-fcs:  #10b981;
+      --radius:     12px;
+      --radius-sm:  8px;
+      --radius-xs:  6px;
+      --shadow:     0 4px 20px rgba(0,0,0,0.3);
+      --tr:         all 0.2s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+
+    body{
+      background:var(--bg);
+      color:var(--text);
+      font-family:'Inter',system-ui,-apple-system,sans-serif;
+      line-height:1.5;
+      min-height:100vh;
+      padding:12px;
+    }
+    @media(min-width:640px){body{padding:20px;}}
+
+    .container{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:18px;}
+
+    /* ─── APP HEADER ─────────────────────────────── */
+    .app-header{
+      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+      padding:16px 22px;
+      background:linear-gradient(135deg,#1e293b,var(--panel));
+      border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);
+    }
+    .header-brand{display:flex;align-items:center;gap:14px;}
+    .header-logo{
+      width:46px;height:46px;border-radius:11px;flex-shrink:0;
+      background:linear-gradient(135deg,var(--primary),var(--accent));
+      display:flex;align-items:center;justify-content:center;
+    }
+    .header-logo svg{color:#0b0f19;}
+    .header-title{
+      font-size:1.15rem;font-weight:800;letter-spacing:-0.02em;line-height:1.2;
+      background:linear-gradient(to right,#fff,var(--accent));
+      -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    }
+    .header-sub{font-size:0.78rem;color:var(--muted);margin-top:2px;}
+    .header-badge{
+      font-size:0.73rem;font-weight:700;
+      background:var(--success-bg);color:var(--accent);
+      border:1px solid rgba(52,211,153,0.22);
+      padding:5px 12px;border-radius:20px;white-space:nowrap;
+    }
+
+    /* ─── TAB NAV ────────────────────────────────── */
+    .tab-nav{
+      display:flex;gap:4px;
+      background:var(--panel);border:1px solid var(--border);
+      border-radius:var(--radius);padding:6px;
+    }
+    .tab-btn{
+      flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+      padding:12px 18px;border-radius:8px;
+      font-size:0.9rem;font-weight:600;font-family:inherit;
+      cursor:pointer;border:none;color:var(--muted);background:transparent;
+      transition:var(--tr);
+    }
+    .tab-btn.active{background:var(--primary);color:#0b0f19;}
+    .tab-btn:not(.active):hover{background:rgba(255,255,255,0.05);color:var(--text);}
+
+    /* ─── TAB CONTENT ────────────────────────────── */
+    .tab-content{display:none;flex-direction:column;gap:18px;}
+    .tab-content.active{display:flex;animation:fadeIn .2s ease;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ─── CARDS ──────────────────────────────────── */
+    .card{
+      background:var(--panel);border:1px solid var(--border);
+      border-radius:var(--radius);padding:22px;
+      box-shadow:0 4px 6px -1px rgba(0,0,0,0.12);
+    }
+    .card-title{
+      font-size:0.95rem;font-weight:700;color:#fff;
+      display:flex;align-items:center;gap:8px;
+      padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:18px;
+    }
+    .card-title svg{color:var(--primary);flex-shrink:0;}
+
+    /* ─── FORM GRID ──────────────────────────────── */
+    .fg{display:grid;grid-template-columns:1fr;gap:12px;}
+    @media(min-width:480px){.fg-2{grid-template-columns:1fr 1fr;}}
+    @media(min-width:640px){.fg-3{grid-template-columns:1fr 1fr 1fr;}}
+    @media(min-width:860px){.fg-4{grid-template-columns:1fr 1fr 1fr 1fr;}}
+
+    .fgroup{display:flex;flex-direction:column;gap:5px;}
+    label{font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;}
+
+    input[type=text],input[type=number],input[type=date],input[type=time],select,textarea{
+      background:var(--input-bg);border:1px solid var(--input-bdr);border-radius:var(--radius-xs);
+      color:var(--text);padding:11px 13px;font-size:0.93rem;font-family:inherit;
+      width:100%;transition:var(--tr);min-height:44px;
+    }
+    input:focus,select:focus,textarea:focus{
+      outline:none;border-color:var(--input-fcs);box-shadow:0 0 0 3px rgba(16,185,129,0.15);
+    }
+    input::placeholder,textarea::placeholder{color:#475569;}
+    input[readonly]{background:rgba(255,255,255,0.03);color:var(--gold);font-weight:700;cursor:default;}
+    select option{background:#1e293b;}
+
+    /* ─── TOGGLE ─────────────────────────────────── */
+    .toggle-row{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:12px 15px;background:rgba(255,255,255,0.02);
+      border:1px solid var(--border);border-radius:var(--radius-sm);
+      cursor:pointer;user-select:none;min-height:52px;gap:12px;
+    }
+    .toggle-info{display:flex;flex-direction:column;gap:2px;}
+    .toggle-title{font-size:0.9rem;font-weight:600;color:var(--text);}
+    .toggle-desc{font-size:0.73rem;color:var(--muted);}
+    .switch{position:relative;display:inline-block;width:50px;height:26px;flex-shrink:0;}
+    .switch input{opacity:0;width:0;height:0;}
+    .slider{position:absolute;cursor:pointer;inset:0;background:var(--input-bdr);transition:.3s;border-radius:34px;}
+    .slider:before{position:absolute;content:"";height:18px;width:18px;left:4px;bottom:4px;background:white;transition:.3s;border-radius:50%;}
+    input:checked+.slider{background:var(--primary);}
+    input:checked+.slider:before{transform:translateX(24px);}
+
+    /* ─── STATUS PILLS ───────────────────────────── */
+    .pills{display:flex;gap:7px;flex-wrap:wrap;}
+    .pill{
+      padding:7px 14px;border-radius:20px;font-size:0.78rem;font-weight:700;
+      cursor:pointer;border:1px solid var(--input-bdr);
+      background:transparent;color:var(--muted);font-family:inherit;
+      transition:var(--tr);min-height:36px;letter-spacing:0.02em;
+    }
+    .pill:hover{border-color:rgba(255,255,255,0.2);color:var(--text);}
+    .pill-org{background:var(--success-bg);border-color:rgba(16,185,129,0.35);color:var(--accent);}
+    .pill-conv{background:var(--warning-bg);border-color:rgba(245,158,11,0.35);color:var(--warning);}
+    .pill-std{background:var(--info-bg);border-color:rgba(99,102,241,0.35);color:var(--info);}
+
+    /* ─── SECTION LABELS ─────────────────────────── */
+    .section-lbl{
+      font-size:0.68rem;font-weight:800;text-transform:uppercase;
+      letter-spacing:0.1em;color:var(--primary);
+      display:flex;align-items:center;gap:10px;margin-bottom:10px;
+    }
+    .section-lbl::after{content:'';flex:1;height:1px;background:var(--border);}
+    .section-lbl.amber{color:var(--gold);}
+
+    /* ─── ITEM ROWS ──────────────────────────────── */
+    .item-row{
+      background:rgba(255,255,255,0.018);border:1px solid var(--border);
+      border-radius:10px;padding:16px;margin-bottom:10px;
+      border-left:3px solid var(--primary);transition:var(--tr);
+    }
+    .item-row.amber{border-left-color:var(--gold);}
+    .item-row:hover{border-color:rgba(255,255,255,0.13);}
+    .item-row-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .row-badge{
+      width:28px;height:28px;border-radius:50%;
+      background:var(--primary);color:#0b0f19;
+      display:flex;align-items:center;justify-content:center;
+      font-size:0.78rem;font-weight:800;flex-shrink:0;
+    }
+    .row-badge.amber{background:var(--gold);}
+    .row-total-lbl{font-size:0.98rem;font-weight:800;color:var(--gold);}
+
+    /* ─── SUBTOTAL / TOTAL BARS ──────────────────── */
+    .sub-bar{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:10px 16px;border-radius:8px;margin:4px 0 14px;
+    }
+    .sub-bar.green{background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.18);}
+    .sub-bar.amber{background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.18);}
+    .sub-lbl{font-size:0.83rem;color:var(--muted);font-weight:500;}
+    .sub-val{font-size:1rem;font-weight:800;}
+    .sub-val.green{color:var(--accent);}
+    .sub-val.amber{color:var(--gold);}
+
+    .total-bar{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:16px 20px;border-radius:10px;margin-top:6px;
+      background:linear-gradient(135deg,rgba(245,158,11,0.13),rgba(245,158,11,0.06));
+      border:1px solid var(--gold-border);
+    }
+    .total-lbl{font-size:0.95rem;color:var(--text);font-weight:700;}
+    .total-sub{font-size:0.72rem;color:var(--muted);margin-top:2px;}
+    .total-val{font-size:1.5rem;font-weight:800;color:var(--gold);}
+
+    /* ─── BUTTONS ────────────────────────────────── */
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:7px;
+      padding:11px 18px;border-radius:var(--radius-xs);
+      font-size:0.9rem;font-weight:700;font-family:inherit;
+      cursor:pointer;border:none;transition:var(--tr);min-height:44px;
+      white-space:nowrap;
+    }
+    .btn-primary{background:var(--primary);color:#0b0f19;}
+    .btn-primary:hover{background:var(--primary-h);transform:translateY(-1px);box-shadow:0 4px 12px rgba(16,185,129,0.3);}
+    .btn-secondary{background:rgba(255,255,255,0.05);color:var(--text);border:1px solid var(--border);}
+    .btn-secondary:hover{background:rgba(255,255,255,0.09);}
+    .btn-danger{background:var(--danger-bg);color:#fca5a5;border:1px solid rgba(239,68,68,0.28);}
+    .btn-danger:hover{background:rgba(239,68,68,0.2);}
+    .btn-gold{background:var(--gold-bg);color:var(--gold);border:1px solid var(--gold-border);}
+    .btn-gold:hover{background:rgba(245,158,11,0.2);}
+    .btn-sm{padding:8px 13px;font-size:0.82rem;min-height:36px;}
+    .btn-xs{padding:5px 10px;font-size:0.75rem;min-height:30px;}
+    .actions-bar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
+
+    /* ─── SIGNATURE PADS ─────────────────────────── */
+    .sig-grid{display:grid;grid-template-columns:1fr;gap:14px;}
+    @media(min-width:480px){.sig-grid{grid-template-columns:1fr 1fr;}}
+
+    .sig-card{
+      background:rgba(255,255,255,0.02);border:1px solid var(--border);
+      border-radius:10px;padding:14px;
+    }
+    .sig-title{
+      font-size:0.72rem;font-weight:800;text-transform:uppercase;
+      letter-spacing:0.05em;color:var(--muted);margin-bottom:10px;
+    }
+    .sig-wrap{
+      position:relative;height:96px;
+      background:rgba(255,255,255,0.025);border:1px dashed var(--input-bdr);
+      border-radius:6px;overflow:hidden;cursor:crosshair;
+    }
+    .sig-wrap canvas{width:100%;height:100%;display:block;touch-action:none;}
+    .sig-hint{
+      position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+      font-size:0.72rem;color:#475569;pointer-events:none;text-align:center;
+      transition:opacity .2s;
+    }
+    .sig-row{display:flex;align-items:center;gap:7px;margin-top:8px;}
+    .sig-name{flex:1;}
+
+    /* ─── TRANSPORT TABLE ────────────────────────── */
+    .t-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border);}
+    .t-table{width:100%;border-collapse:collapse;min-width:680px;}
+    .t-table th{
+      background:rgba(255,255,255,0.04);padding:10px 11px;text-align:left;
+      font-size:0.72rem;font-weight:700;text-transform:uppercase;
+      letter-spacing:0.05em;color:var(--muted);border-bottom:1px solid var(--border);
+      white-space:nowrap;
+    }
+    .t-table td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle;}
+    .t-table tr:last-child td{border-bottom:none;}
+    .t-table tr:hover td{background:rgba(255,255,255,0.018);}
+    .t-table input,.t-table select{
+      background:transparent;border:1px solid transparent;
+      padding:6px 8px;min-height:36px;font-size:0.87rem;
+    }
+    .t-table input:focus,.t-table select:focus{background:var(--input-bg);border-color:var(--input-fcs);}
+    .row-num{width:32px;text-align:center;font-size:0.78rem;font-weight:700;color:var(--muted);}
+
+    /* ─── JOURNEY ────────────────────────────────── */
+    .journey-grid{display:grid;grid-template-columns:1fr;gap:14px;}
+    @media(min-width:640px){.journey-grid{grid-template-columns:1fr 1fr;}}
+    .journey-sec{
+      background:rgba(255,255,255,0.02);border:1px solid var(--border);
+      border-radius:10px;padding:15px;
+    }
+    .journey-title{
+      font-size:0.75rem;font-weight:800;text-transform:uppercase;
+      letter-spacing:0.06em;margin-bottom:12px;
+      display:flex;align-items:center;gap:6px;
+    }
+    .journey-title.dep{color:var(--warning);}
+    .journey-title.arr{color:var(--accent);}
+
+    /* ─── STATS ROW ──────────────────────────────── */
+    .stats-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    @media(min-width:480px){.stats-row{grid-template-columns:repeat(4,1fr);}}
+    .stat-card{
+      background:rgba(255,255,255,0.025);border:1px solid var(--border);
+      border-radius:10px;padding:13px;
+    }
+    .stat-lbl{font-size:0.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;}
+    .stat-val{font-size:1.25rem;font-weight:800;color:var(--text);margin-top:4px;}
+    .stat-val.green{color:var(--accent);}
+    .stat-val.gold{color:var(--gold);}
+
+    /* ─── HISTORY / RECORDS ──────────────────────── */
+    .hist-header{
+      display:flex;align-items:center;justify-content:space-between;
+      flex-wrap:wrap;gap:12px;margin-bottom:14px;
+    }
+    .records-grid{display:grid;grid-template-columns:1fr;gap:10px;}
+    @media(min-width:560px){.records-grid{grid-template-columns:1fr 1fr;}}
+    @media(min-width:1024px){.records-grid{grid-template-columns:1fr 1fr 1fr;}}
+
+    .rec-card{
+      background:rgba(255,255,255,0.02);border:1px solid var(--border);
+      border-radius:10px;padding:13px;transition:var(--tr);
+    }
+    .rec-card:hover{border-color:rgba(52,211,153,0.22);background:rgba(52,211,153,0.04);}
+    .rec-card-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px;}
+    .rec-name{font-weight:800;font-size:0.92rem;}
+    .rec-date{font-size:0.73rem;color:var(--muted);margin-top:1px;}
+    .rec-meta{display:flex;flex-direction:column;gap:3px;}
+    .rec-stat{font-size:0.78rem;color:var(--muted);}
+    .rec-total{font-size:0.98rem;font-weight:800;color:var(--gold);margin-top:7px;}
+
+    /* ─── SEARCH ─────────────────────────────────── */
+    .search-wrap{position:relative;}
+    .search-wrap svg{
+      position:absolute;left:11px;top:50%;transform:translateY(-50%);
+      color:var(--muted);pointer-events:none;
+    }
+    .search-wrap input{padding-left:36px;}
+
+    /* ─── MODALS ─────────────────────────────────── */
+    .overlay{
+      position:fixed;inset:0;background:rgba(0,0,0,0.72);
+      display:flex;align-items:center;justify-content:center;
+      padding:16px;z-index:1000;
+      opacity:0;pointer-events:none;transition:opacity .2s;
+    }
+    .overlay.open{opacity:1;pointer-events:all;}
+    .modal{
+      background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+      padding:22px;width:100%;max-width:560px;max-height:85vh;overflow-y:auto;
+      transform:translateY(18px);transition:var(--tr);
+      display:flex;flex-direction:column;gap:14px;
+    }
+    .overlay.open .modal{transform:translateY(0);}
+    .modal-title{font-size:1.05rem;font-weight:800;display:flex;align-items:center;gap:8px;}
+    .modal-foot{display:flex;justify-content:flex-end;gap:9px;padding-top:14px;border-top:1px solid var(--border);}
+
+    /* Import items */
+    .import-item{
+      display:flex;align-items:center;gap:11px;padding:12px;
+      border:1px solid var(--border);border-radius:8px;cursor:pointer;
+      transition:var(--tr);margin-bottom:8px;
+    }
+    .import-item:hover{border-color:rgba(52,211,153,0.3);background:rgba(52,211,153,0.04);}
+    .import-item.sel{border-color:var(--primary);background:var(--success-bg);}
+    .imp-chk{
+      width:20px;height:20px;border-radius:4px;border:2px solid var(--input-bdr);
+      background:transparent;display:flex;align-items:center;justify-content:center;
+      flex-shrink:0;transition:var(--tr);
+    }
+    .import-item.sel .imp-chk{background:var(--primary);border-color:var(--primary);}
+
+    /* ─── TOASTS ─────────────────────────────────── */
+    .toast-wrap{
+      position:fixed;bottom:20px;right:16px;
+      display:flex;flex-direction:column;gap:8px;z-index:2000;
+    }
+    .toast{
+      padding:11px 18px;border-radius:8px;font-size:0.88rem;font-weight:600;
+      animation:slideIn .3s ease,fadeOut .3s ease 2.7s forwards;
+      max-width:300px;
+    }
+    .toast-ok{background:var(--success-bg);color:var(--accent);border:1px solid rgba(16,185,129,0.3);}
+    .toast-err{background:var(--danger-bg);color:#fca5a5;border:1px solid rgba(239,68,68,0.3);}
+    .toast-inf{background:var(--info-bg);color:var(--info);border:1px solid rgba(99,102,241,0.25);}
+    @keyframes slideIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+    @keyframes fadeOut{to{opacity:0;transform:translateY(6px)}}
+
+    /* ─── EMPTY STATE ────────────────────────────── */
+    .empty{text-align:center;padding:44px 20px;color:var(--muted);}
+    .empty svg{margin:0 auto 14px;opacity:.35;display:block;}
+    .empty p{font-size:0.87rem;}
+
+    /* ─── PRICE HINT ─────────────────────────────── */
+    .price-hint{
+      font-size:0.72rem;color:var(--accent);font-weight:700;
+      margin-top:2px;min-height:14px;
+    }
+
+    /* ─── UTILITIES ──────────────────────────────── */
+    .mt-3{margin-top:12px;} .mt-4{margin-top:16px;} .mt-2{margin-top:8px;}
+    .separator{border:none;border-top:1px solid var(--border);margin:14px 0;}
+    .text-muted{color:var(--muted);}
+
+    /* ─── SCROLLBARS ─────────────────────────────── */
+    ::-webkit-scrollbar{width:6px;height:6px;}
+    ::-webkit-scrollbar-track{background:var(--bg);}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+    ::-webkit-scrollbar-thumb:hover{background:var(--input-bdr);}
+
+    /* ─── PRINT ──────────────────────────────────── */
+    @media print{
+      body{background:#fff;color:#111;padding:0;font-size:12px;}
+      .tab-nav,.actions-bar,.hist-header .actions-bar,.header-badge,.btn{display:none!important;}
+      .card{background:#fff;border:1px solid #ccc;box-shadow:none;break-inside:avoid;}
+      .item-row{background:#f9f9f9;border:1px solid #ddd;}
+      .total-bar{background:#fff8e1;border:1px solid #ffc107;}
+      .sub-bar.green{background:#e8f5e9;border:1px solid #a5d6a7;}
+      .sub-bar.amber{background:#fff3e0;border:1px solid #ffcc80;}
+      label{color:#555;}
+      input,select{border:1px solid #bbb;background:#fff;color:#111;}
+      input[readonly]{color:#5c3a00;}
+      .stat-card{background:#f5f5f5;border:1px solid #ddd;}
+      .app-header{background:#fff;border:1px solid #ccc;}
+      .header-title{color:#0b0f19;-webkit-text-fill-color:#0b0f19;background:none;}
+      .tab-content{display:flex!important;}
+      #content-transport{display:none!important;}
+      .card-title svg{color:#10b981;}
+      .section-lbl{color:#059669;}
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ═══════════════════════════════════════════════
+       APP HEADER
+  ══════════════════════════════════════════════════ -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="header-logo">
+        <svg width="26" height="26" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a4 4 0 0 1 4 4v1H8V6a4 4 0 0 1 4-4z"/>
+          <path d="M8 7v10a4 4 0 0 0 8 0V7"/>
+          <path d="M12 11v5"/><path d="M10 13l2-2 2 2"/>
+        </svg>
+      </div>
+      <div>
+        <div class="header-title">IBIS RICE CONSERVATION CO., LTD</div>
+        <div class="header-sub">Paddy Purchase Invoice · Digital Field Tool · v1.0</div>
+      </div>
+    </div>
+    <span class="header-badge">⚡ Offline Ready</span>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════
+       TAB NAVIGATION
+  ══════════════════════════════════════════════════ -->
+  <nav class="tab-nav" role="tablist">
+    <button class="tab-btn active" onclick="switchTab('purchase')" id="tab-purchase">
+      <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+      </svg>
+      🌾 Purchase Record
+    </button>
+    <button class="tab-btn" onclick="switchTab('transport')" id="tab-transport">
+      <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+      </svg>
+      🚛 Transport Record
+    </button>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════
+       PURCHASE RECORD TAB
+  ══════════════════════════════════════════════════ -->
+  <div class="tab-content active" id="content-purchase">
+
+    <!-- Farmer Info -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="19" height="19" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Farmer &amp; Transaction Info
+      </div>
+      <div class="fg fg-4">
+        <div class="fgroup">
+          <label for="p-date">Purchase Date</label>
+          <input type="date" id="p-date">
+        </div>
+        <div class="fgroup">
+          <label for="p-name">Producer Name</label>
+          <input type="text" id="p-name" placeholder="e.g., Sok San">
+        </div>
+        <div class="fgroup">
+          <label for="p-code">Family Code</label>
+          <input type="text" id="p-code" placeholder="e.g., TB034">
+        </div>
+        <div class="fgroup">
+          <label for="p-village">Village</label>
+          <select id="p-village">
+            <option value="" disabled selected>Select Village</option>
+            <option>Bra</option><option>Damnak Kantout</option><option>Dan</option>
+            <option>Dang Phlet</option><option>Kampenh</option><option>Kampong Sangkae</option>
+            <option>Kham Keut</option><option>Kong Yoang</option><option>Krala Peas</option>
+            <option>Narong</option><option>Okak</option><option>Pongro</option>
+            <option>Prey Veng</option><option>Sambou</option><option>Soung</option>
+            <option>Tmat Paeuy</option><option>Yeang</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Purchase Items -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="19" height="19" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        Paddy Purchase Items
+      </div>
+
+      <!-- ── Section A ── -->
+      <div class="section-lbl">Section A — Paddy Purchase (Organic Only)</div>
+
+      <!-- Row 1 -->
+      <div class="item-row" id="pr-row-1">
+        <div class="item-row-hdr">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="row-badge">1</div>
+            <span style="font-size:0.82rem;color:var(--muted);">Paddy Purchase Details</span>
+          </div>
+          <div class="row-total-lbl" id="pr-tdsp-1">0 KHR</div>
+        </div>
+        <div class="fg fg-3" style="margin-bottom:11px;">
+          <div class="fgroup">
+            <label>Variety</label>
+            <select id="pr-var-1" onchange="onVariety(1)">
+              <option value="">— Select Variety —</option>
+              <option>Phka Rumduol</option><option>Red Jasmine</option>
+              <option>Foundation Seed – Red Jasmine</option><option>Foundation Seed – Rumduol</option>
+              <option>Certified Seed</option><option>White Rice</option><option>Local Variety</option>
+            </select>
+          </div>
+          <div class="fgroup">
+            <label>Grade</label>
+            <select id="pr-grd-1" onchange="onGrade(1)"><option value="">— Select Variety First —</option></select>
+          </div>
+          <div class="fgroup">
+            <label>Number of Sacks</label>
+            <input type="number" id="pr-sacks-1" placeholder="0" min="0" step="1" oninput="calcRow(1)">
+          </div>
+        </div>
+        <div class="fg fg-3">
+          <div class="fgroup">
+            <label>Unit Price (KHR/kg)</label>
+            <input type="number" id="pr-prc-1" placeholder="0" min="0" step="0.5" oninput="calcRow(1)">
+            <div class="price-hint" id="pr-phint-1"></div>
+          </div>
+          <div class="fgroup">
+            <label>Quantity (kg)</label>
+            <input type="number" id="pr-qty-1" placeholder="0.00" min="0" step="0.01" oninput="calcRow(1)">
+          </div>
+          <div class="fgroup">
+            <label>Paddy Value (KHR)</label>
+            <input type="text" id="pr-tot-1" readonly placeholder="—">
+          </div>
+        </div>
+        <input type="hidden" id="pr-sts-1" value="Organic">
+      </div>
+
+      <!-- Subtotal A -->
+      <div class="sub-bar green">
+        <span class="sub-lbl">📦 Subtotal A — Total Paddy Value</span>
+        <span class="sub-val green" id="pr-suba">0 KHR</span>
+      </div>
+
+      <!-- ── Section B ── -->
+      <div class="section-lbl amber">Section B — Seed Return Deduction (10% Interest)</div>
+
+      <!-- Seed Return Row -->
+      <div class="item-row amber" id="pr-row-seed">
+        <div class="item-row-hdr">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="row-badge amber">🌱</div>
+            <span style="font-size:0.82rem;color:var(--muted);">Seed Return Repayment</span>
+          </div>
+          <div class="row-total-lbl" id="pr-ded-dsp">0 KHR</div>
+        </div>
+        <div class="fg fg-4">
+          <div class="fgroup">
+            <label>Seed Borrowed (kg)</label>
+            <input type="number" id="pr-seed-borrowed" placeholder="0.00" min="0" step="0.01" oninput="calcSeedDeduction()">
+          </div>
+          <div class="fgroup">
+            <label>Repayment Qty (110%) (kg)</label>
+            <input type="text" id="pr-seed-repay-qty" readonly placeholder="—">
+          </div>
+          <div class="fgroup">
+            <label>Unit Price (KHR/kg)</label>
+            <input type="text" id="pr-seed-price" readonly placeholder="—">
+          </div>
+          <div class="fgroup">
+            <label>Deduction Total (KHR)</label>
+            <input type="text" id="pr-seed-deduction" readonly placeholder="—">
+          </div>
+        </div>
+      </div>
+
+      <!-- Subtotal B -->
+      <div class="sub-bar amber">
+        <span class="sub-lbl">🌱 Subtotal B — Seed Deduction (Deducted from Payment)</span>
+        <span class="sub-val amber" id="pr-subb">0 KHR</span>
+      </div>
+
+      <!-- Grand Total -->
+      <div class="total-bar">
+        <div>
+          <div class="total-lbl">💰 Net Payment to Farmer</div>
+          <div class="total-sub">Subtotal A (Paddy Value) − Subtotal B (Seed Deduction)</div>
+        </div>
+        <div class="total-val" id="pr-grand">0 KHR</div>
+      </div>
+    </div>
+
+    <!-- Signatures -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="19" height="19" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+        Signatures &amp; Acknowledgement
+      </div>
+      <div class="sig-grid">
+        <div class="sig-card">
+          <div class="sig-title">✍️ Seller (Farmer)</div>
+          <div class="sig-wrap" id="sw-1"><canvas id="sc-1"></canvas><div class="sig-hint" id="sh-1">Draw signature here</div></div>
+          <div class="sig-row"><input type="text" class="sig-name" id="sn-1" placeholder="Farmer Name"><button class="btn btn-secondary btn-xs" onclick="clrSig(1)">Clear</button></div>
+          <div class="fgroup mt-2"><label>Date</label><input type="date" id="sd-1"></div>
+        </div>
+        <div class="sig-card">
+          <div class="sig-title">✍️ Buyer (Staff)</div>
+          <div class="sig-wrap" id="sw-2"><canvas id="sc-2"></canvas><div class="sig-hint" id="sh-2">Draw signature here</div></div>
+          <div class="sig-row"><input type="text" class="sig-name" id="sn-2" placeholder="Staff Name"><button class="btn btn-secondary btn-xs" onclick="clrSig(2)">Clear</button></div>
+          <div class="fgroup mt-2"><label>Date</label><input type="date" id="sd-2"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="card">
+      <div class="actions-bar" style="justify-content:flex-end;">
+        <button class="btn btn-secondary" onclick="resetPurchase()">
+          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 101 5.2M3 12V6m0 6h6"/></svg>
+          Reset Form
+        </button>
+        <button class="btn btn-secondary" onclick="window.print()">
+          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm1-4h.01M13 13h.01"/></svg>
+          Print
+        </button>
+        <button class="btn btn-primary" onclick="savePurchase()">
+          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+          Save Purchase Record
+        </button>
+      </div>
+    </div>
+
+    <!-- Purchase History -->
+    <div class="card">
+      <div class="hist-header">
+        <div class="card-title" style="margin:0;padding:0;border:none;">
+          <svg width="19" height="19" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          Purchase Records History
+        </div>
+        <div class="actions-bar" style="gap:8px;">
+          <div class="search-wrap">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <input type="text" id="p-search" placeholder="Search farmer, code, village…" oninput="renderPH()" style="padding-left:34px;min-width:180px;">
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="exportPurchaseCSV()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Export CSV
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="confirmClear('purchase')">Clear All</button>
+        </div>
+      </div>
+      <!-- Stats -->
+      <div class="stats-row" style="margin-bottom:14px;">
+        <div class="stat-card"><div class="stat-lbl">Records</div><div class="stat-val" id="pst-cnt">0</div></div>
+        <div class="stat-card"><div class="stat-lbl">Total Weight</div><div class="stat-val green" id="pst-wt">0 kg</div></div>
+        <div class="stat-card"><div class="stat-lbl">Total Payment</div><div class="stat-val gold" id="pst-pay">0</div></div>
+        <div class="stat-card"><div class="stat-lbl">Villages</div><div class="stat-val" id="pst-vill">—</div></div>
+      </div>
+      <div id="p-history"></div>
+    </div>
+  </div><!-- /purchase tab -->
+
+  <!-- ═══════════════════════════════════════════════
+       TRANSPORT RECORD TAB
+  ══════════════════════════════════════════════════ -->
+  <div class="tab-content" id="content-transport">
+
+    <!-- Driver / Truck Info -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="19" height="19" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        Transport &amp; Driver Info
+      </div>
+      <div style="margin-bottom:14px; max-width: 300px;">
+        <div class="fgroup">
+          <label for="t-date">Transport Date</label>
+          <input type="date" id="t-date">
+        </div>
+        <input type="hidden" id="t-pstatus" value="Organic">
+      </div>
+      <div class="fg fg-3" style="margin-bottom:14px;">
+        <div class="fgroup">
+          <label for="t-driver">Driver Name</label>
+          <input type="text" id="t-driver" placeholder="Driver full name">
+        </div>
+        <div class="fgroup">
+          <label for="t-plate">Plate Number</label>
+          <input type="text" id="t-plate" placeholder="e.g., 2AA-1234">
+        </div>
+        <div class="fgroup">
+          <label for="t-mobile">Mobile Number</label>
+          <input type="text" id="t-mobile" placeholder="e.g., 012 345 678">
+        </div>
+      </div>
+      <div class="toggle-row" onclick="document.getElementById('t-clean').click()">
+        <div class="toggle-info">
+          <div class="toggle-title">✅ Truck Cleaned Before Loading</div>
+          <div class="toggle-desc">Confirm truck was inspected and cleaned prior to loading paddy</div>
+        </div>
+        <label class="switch" onclick="event.stopPropagation()">
+          <input type="checkbox" id="t-clean"><span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Rows Table -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="19" height="19" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+        Farmer Purchase Rows
+        <span style="font-size:0.75rem;color:var(--muted);font-weight:500;">up to 16 rows</span>
+      </div>
+      <div class="actions-bar" style="margin-bottom:14px;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <button class="btn btn-gold btn-sm" onclick="openImport()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          Import from Purchase Records
+        </button>
+        <div class="actions-bar" style="gap:8px;">
+          <button class="btn btn-secondary btn-sm" onclick="addTRow()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            Add Row
+          </button>
+          <span style="font-size:0.8rem;color:var(--muted);" id="t-rowcount">0 / 16</span>
+        </div>
+      </div>
+      <div class="t-wrap">
+        <table class="t-table">
+          <thead>
+            <tr>
+              <th>#</th><th>Rice Variety</th><th>Family Code</th>
+              <th>Village</th><th># Sacks</th><th>Weight (kg)</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="t-tbody"></tbody>
+        </table>
+      </div>
+      <div class="total-bar mt-3">
+        <div>
+          <div class="total-lbl">⚖️ Total Weight</div>
+          <div class="total-sub" id="t-rowsummary">0 rows · 0 sacks</div>
+        </div>
+        <div class="total-val" id="t-totalwt">0.00 kg</div>
+      </div>
+    </div>
+
+    <!-- Transport Staff Info -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="19" height="19" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Responsible Staff &amp; Transport Witness
+      </div>
+      <div class="journey-grid">
+        <div class="journey-sec" style="border-left: 3px solid var(--primary); padding-left: 14px; background: rgba(52, 211, 153, 0.02); border-radius: 0 8px 8px 0; padding-top: 8px; padding-bottom: 8px;">
+          <div class="journey-title" style="color: var(--primary); font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/></svg>
+            Field Staff (Loading &amp; Preparation)
+          </div>
+          <div class="fgroup" style="margin-bottom:10px;">
+            <label for="t-staff">Name</label>
+            <input type="text" id="t-staff" placeholder="Field staff name">
+          </div>
+          <div class="fg fg-2">
+            <div class="fgroup">
+              <label for="t-staff-date">Date</label>
+              <input type="date" id="t-staff-date">
+            </div>
+            <div class="fgroup">
+              <label for="t-staff-time">Time</label>
+              <input type="time" id="t-staff-time">
+            </div>
+          </div>
+        </div>
+        <div class="journey-sec" style="border-left: 3px solid var(--gold); padding-left: 14px; background: rgba(245, 158, 11, 0.02); border-radius: 0 8px 8px 0; padding-top: 8px; padding-bottom: 8px;">
+          <div class="journey-title" style="color: var(--gold); font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            Driver (Witness &amp; Transport)
+          </div>
+          <div class="fgroup" style="margin-bottom:10px;">
+            <label for="t-driver-witness">Name</label>
+            <input type="text" id="t-driver-witness" placeholder="Driver name">
+          </div>
+          <div class="fg fg-2">
+            <div class="fgroup">
+              <label for="t-driver-witness-date">Date</label>
+              <input type="date" id="t-driver-witness-date">
+            </div>
+            <div class="fgroup">
+              <label for="t-driver-witness-time">Time</label>
+              <input type="time" id="t-driver-witness-time">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transport Actions -->
+    <div class="card">
+      <div class="actions-bar" style="justify-content:flex-end;">
+        <button class="btn btn-secondary" onclick="resetTransport()">
+          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 101 5.2M3 12V6m0 6h6"/></svg>
+          Reset Form
+        </button>
+        <button class="btn btn-secondary" onclick="window.print()">
+          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm1-4h.01M13 13h.01"/></svg>
+          Print
+        </button>
+        <button class="btn btn-primary" onclick="saveTransport()">
+          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+          Save Transport Record
+        </button>
+      </div>
+    </div>
+
+    <!-- Transport History -->
+    <div class="card">
+      <div class="hist-header">
+        <div class="card-title" style="margin:0;padding:0;border:none;">
+          <svg width="19" height="19" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          Transport Records History
+        </div>
+        <div class="actions-bar" style="gap:8px;">
+          <button class="btn btn-secondary btn-sm" onclick="exportTransportCSV()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Export CSV
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="confirmClear('transport')">Clear All</button>
+        </div>
+      </div>
+      <div id="t-history"></div>
+    </div>
+  </div><!-- /transport tab -->
+
+</div><!-- /container -->
+
+<!-- ── IMPORT MODAL ───────────────────────────────── -->
+<div class="overlay" id="import-modal">
+  <div class="modal">
+    <div class="modal-title">
+      <svg width="19" height="19" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+      Import from Purchase Records
+    </div>
+    <p style="font-size:0.83rem;color:var(--muted);">Select records to import. Each non-empty item row becomes one transport row.</p>
+    <div class="search-wrap" style="margin-top:8px; margin-bottom:12px;">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <input type="text" id="t-import-search" placeholder="Search by name, code, village, date..." oninput="filterImportList()" style="padding-left:34px;">
+    </div>
+    <div id="import-list" style="max-height:360px;overflow-y:auto;"></div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary btn-sm" onclick="closeImport()">Cancel</button>
+      <button class="btn btn-primary btn-sm" onclick="doImport()">Import Selected</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── CONFIRM MODAL ──────────────────────────────── -->
+<div class="overlay" id="confirm-modal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-title" id="cm-title">Confirm Action</div>
+    <p style="font-size:0.87rem;color:var(--muted);" id="cm-msg">Are you sure?</p>
+    <div class="modal-foot">
+      <button class="btn btn-secondary btn-sm" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger btn-sm" id="cm-ok">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOASTS ─────────────────────────────────────── -->
+<div class="toast-wrap" id="toasts"></div>
+
+<!-- ════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════ -->
+<script>
+/* ── PADDY SPECS DATABASE ────────────────────────── */
+const SPECS = {
+  "Phka Rumduol":               { grades:["A1","A2","B1","B2"], prices:{"A1":1650,"A2":1550,"B1":1500,"B2":1450} },
+  "Red Jasmine":                { grades:["A1","A2","B1","B2"], prices:{"A1":1897.5,"A2":1797.5,"B1":1747.5,"B2":1697.5} },
+  "Foundation Seed – Red Jasmine":{ grades:["A"], prices:{"A":2145} },
+  "Foundation Seed – Rumduol":  { grades:["A"], prices:{"A":2045} },
+  "Certified Seed":             { grades:["Standard"], prices:{"Standard":1900} },
+  "White Rice":                 { grades:["A","B"], prices:{"A":1320,"B":1220} },
+  "Local Variety":              { grades:["Standard"], prices:{"Standard":0} },
+  "Seed Return":                { grades:["N/A"], prices:{"N/A":0} },
+  "Other":                      { grades:["N/A"], prices:{"N/A":0} }
+};
+const ORGANIC_BONUS = 100;
+const VILLAGES = ["Bra","Damnak Kantout","Dan","Dang Phlet","Kampenh","Kampong Sangkae","Kham Keut","Kong Yoang","Krala Peas","Narong","Okak","Pongro","Prey Veng","Sambou","Soung","Tmat Paeuy","Yeang"];
+
+/* ── STATE ───────────────────────────────────────── */
+let purchaseRecs = [];
+let transportRecs = [];
+let tRows = [];
+let sigPads = {};
+let confirmCb = null;
+let importSel = new Set();
+let rowSeq = 0;
+
+/* ── INIT ────────────────────────────────────────── */
+window.addEventListener('DOMContentLoaded', () => {
+  const today = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const timeStr = now.toTimeString().split(' ')[0].substring(0,5);
+  ['p-date','t-date','sd-1','sd-2','t-staff-date','t-driver-witness-date'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = today;
+  });
+  ['t-staff-time','t-driver-witness-time'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = timeStr;
+  });
+  loadData();
+  initSigs();
+  renderTRows();
+  renderPH();
+  renderTH();
+});
+
+/* ── TAB SWITCHING ───────────────────────────────── */
+function switchTab(t) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  document.getElementById('content-'+t).classList.add('active');
+  setTimeout(()=>Object.values(sigPads).forEach(p=>p.resize()), 60);
+}
+
+/* ── SIGNATURE PAD CLASS ─────────────────────────── */
+class SigPad {
+  constructor(canvasId, wrapperId, hintId) {
+    this.canvas  = document.getElementById(canvasId);
+    this.wrap    = document.getElementById(wrapperId);
+    this.hint    = document.getElementById(hintId);
+    this.ctx     = this.canvas.getContext('2d');
+    this.drawing = false;
+    this.hasData = false;
+    this.resize();
+    this._bind();
+  }
+  resize() {
+    const dpr = window.devicePixelRatio || 1;
+    const r   = this.wrap.getBoundingClientRect();
+    const w   = Math.max(r.width || 200, 100);
+    const h   = parseInt(getComputedStyle(this.wrap).height) || 96;
+    let saved = null;
+    if(this.hasData) saved = this.canvas.toDataURL();
+    this.canvas.width  = w * dpr;
+    this.canvas.height = h * dpr;
+    this.canvas.style.width  = w + 'px';
+    this.canvas.style.height = h + 'px';
+    this.ctx.scale(dpr, dpr);
+    this.ctx.lineWidth  = 2;
+    this.ctx.lineCap    = 'round';
+    this.ctx.lineJoin   = 'round';
+    this.ctx.strokeStyle = '#34d399';
+    if(saved) { const img=new Image(); img.onload=()=>this.ctx.drawImage(img,0,0,w,h); img.src=saved; }
+  }
+  _pos(e) {
+    const r = this.canvas.getBoundingClientRect();
+    const s = e.changedTouches ? e.changedTouches[0] : e;
+    return { x: s.clientX - r.left, y: s.clientY - r.top };
+  }
+  _bind() {
+    const start = (e)=>{ e.preventDefault(); this.drawing=true; const p=this._pos(e); this.ctx.beginPath(); this.ctx.moveTo(p.x,p.y); if(this.hint) this.hint.style.opacity='0'; };
+    const move  = (e)=>{ if(!this.drawing) return; e.preventDefault(); const p=this._pos(e); this.ctx.lineTo(p.x,p.y); this.ctx.stroke(); this.ctx.beginPath(); this.ctx.moveTo(p.x,p.y); this.hasData=true; };
+    const end   = ()=>{ this.drawing=false; };
+    this.canvas.addEventListener('mousedown', start);
+    this.canvas.addEventListener('mousemove', move);
+    this.canvas.addEventListener('mouseup',   end);
+    this.canvas.addEventListener('mouseleave',end);
+    this.canvas.addEventListener('touchstart',start,{passive:false});
+    this.canvas.addEventListener('touchmove', move, {passive:false});
+    this.canvas.addEventListener('touchend',  end);
+  }
+  clear()  { this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height); this.hasData=false; if(this.hint) this.hint.style.opacity='1'; }
+  isEmpty(){ return !this.hasData; }
+  toDataURL(){ return this.canvas.toDataURL(); }
+}
+
+function initSigs() {
+  const defs = [
+    ['sc-1','sw-1','sh-1'],['sc-2','sw-2','sh-2'],
+  ];
+  defs.forEach(([c,w,h])=>{ const k=c.replace('sc-',''); sigPads[k]=new SigPad(c,w,h); });
+  window.addEventListener('resize',()=>Object.values(sigPads).forEach(p=>p.resize()));
+}
+function clrSig(id){ if(sigPads[id]) sigPads[id].clear(); }
+
+/* ── PURCHASE FORM LOGIC ─────────────────────────── */
+function onVariety(row) {
+  const v = document.getElementById('pr-var-'+row).value;
+  const gs = document.getElementById('pr-grd-'+row);
+  gs.innerHTML = '';
+  if(!v || !SPECS[v]) {
+    gs.innerHTML = '<option value="">—</option>';
+    clearPriceHint(row);
+    calcRow(row);
+    return;
+  }
+  SPECS[v].grades.forEach(g => {
+    const bp = SPECS[v].prices[g];
+    const o  = document.createElement('option');
+    o.value = g;
+    o.textContent = g + (bp > 0 ? '  —  ' + bp.toLocaleString() + ' KHR/kg' : '  —  Manual Price');
+    gs.appendChild(o);
+  });
+  onGrade(row);
+}
+
+function onGrade(row) {
+  const v  = document.getElementById('pr-var-'+row).value;
+  const g  = document.getElementById('pr-grd-'+row).value;
+  const pi = document.getElementById('pr-prc-'+row);
+  const hint = document.getElementById('pr-phint-'+row);
+
+  if(v && g && SPECS[v] && SPECS[v].prices[g] !== undefined) {
+    let base = SPECS[v].prices[g];
+    const final = base > 0 ? base + ORGANIC_BONUS : 0;
+    if(base > 0) {
+      pi.value = final;
+      hint.textContent = base.toLocaleString() + ' base + ' + ORGANIC_BONUS + ' organic bonus = ' + final.toLocaleString() + ' KHR/kg';
+    } else {
+      pi.value = '';
+      hint.textContent = 'Manual price entry required';
+    }
+  } else {
+    clearPriceHint(row);
+  }
+  calcRow(row);
+}
+
+function clearPriceHint(row) {
+  const hint = document.getElementById('pr-phint-'+row);
+  if(hint) hint.textContent = '';
+}
+
+function calcRow(row) {
+  const price = parseFloat(document.getElementById('pr-prc-'+row).value) || 0;
+  const qty   = parseFloat(document.getElementById('pr-qty-'+row).value)  || 0;
+  const tot   = price * qty;
+  document.getElementById('pr-tot-'+row).value  = tot > 0 ? fmtKHR(tot) : '';
+  document.getElementById('pr-tdsp-'+row).textContent = tot > 0 ? fmtKHR(tot) : '0 KHR';
+  calcSeedDeduction();
+}
+
+function calcSeedDeduction() {
+  const borrowed = parseFloat(document.getElementById('pr-seed-borrowed').value) || 0;
+  const price = parseFloat(document.getElementById('pr-prc-1').value) || 0;
+  
+  const repayQty = borrowed * 1.10;
+  const deduction = repayQty * price;
+  
+  document.getElementById('pr-seed-repay-qty').value = borrowed > 0 ? repayQty.toFixed(2) + ' kg' : '';
+  document.getElementById('pr-seed-price').value = price > 0 ? price : '';
+  document.getElementById('pr-seed-deduction').value = deduction > 0 ? fmtKHR(deduction) : '';
+  document.getElementById('pr-ded-dsp').textContent = deduction > 0 ? '-' + fmtKHR(deduction) : '0 KHR';
+  
+  calcTotals();
+}
+
+function calcTotals() {
+  const price = parseFloat(document.getElementById('pr-prc-1').value) || 0;
+  const qty = parseFloat(document.getElementById('pr-qty-1').value) || 0;
+  const paddyValue = price * qty;
+  
+  const borrowed = parseFloat(document.getElementById('pr-seed-borrowed').value) || 0;
+  const repayQty = borrowed * 1.10;
+  const deduction = repayQty * price;
+  
+  const grandTotal = paddyValue - deduction;
+  
+  document.getElementById('pr-suba').textContent  = fmtKHR(paddyValue);
+  document.getElementById('pr-subb').textContent  = deduction > 0 ? '-' + fmtKHR(deduction) : '0 KHR';
+  document.getElementById('pr-grand').textContent = fmtKHR(grandTotal);
+}
+
+/* ── SAVE PURCHASE ───────────────────────────────── */
+function savePurchase() {
+  const name = document.getElementById('p-name').value.trim();
+  const code = document.getElementById('p-code').value.trim();
+  const date = document.getElementById('p-date').value;
+  if(!name||!code||!date){ toast('Please fill in Producer Name, Family Code, and Date.','err'); return; }
+
+  const paddyVariety = document.getElementById('pr-var-1').value;
+  const paddyGrade = document.getElementById('pr-grd-1').value;
+  const paddySacks = parseInt(document.getElementById('pr-sacks-1').value) || 0;
+  const paddyPrice = parseFloat(document.getElementById('pr-prc-1').value) || 0;
+  const paddyWeight = parseFloat(document.getElementById('pr-qty-1').value) || 0;
+  const seedBorrowed = parseFloat(document.getElementById('pr-seed-borrowed').value) || 0;
+  const seedRepayQty = seedBorrowed * 1.10;
+  const seedDeduction = seedRepayQty * paddyPrice;
+  const netPayment = (paddyPrice * paddyWeight) - seedDeduction;
+
+  const items = [
+    {
+      row: 1,
+      variety: paddyVariety,
+      grade: paddyGrade,
+      status: 'Organic',
+      unitPrice: paddyPrice,
+      quantity: paddyWeight,
+      sacks: paddySacks,
+      total: paddyPrice * paddyWeight
+    }
+  ];
+
+  const sigs = {};
+  [1,2].forEach(i=>{
+    sigs[i] = {
+      name: document.getElementById('sn-'+i).value,
+      date: document.getElementById('sd-'+i).value,
+      hasDrawing: sigPads[String(i)] ? !sigPads[String(i)].isEmpty() : false
+    };
+  });
+
+  const rec = {
+    id: Date.now().toString(),
+    date, producerName:name, familyCode:code,
+    village: document.getElementById('p-village').value,
+    items,
+    seedBorrowed,
+    seedRepayQty,
+    seedDeduction,
+    totalWeight: paddyWeight,
+    totalPayment: netPayment,
+    signatures: sigs,
+    createdAt: new Date().toISOString()
+  };
+  purchaseRecs.unshift(rec);
+  saveData();
+  renderPH();
+  toast('✅ Purchase record saved!','ok');
+}
+
+function deletePurchase(id){
+  purchaseRecs = purchaseRecs.filter(r=>r.id!==id);
+  saveData(); renderPH();
+  toast('Record deleted.','inf');
+}
+
+function resetPurchase(){
+  document.getElementById('p-name').value = '';
+  document.getElementById('p-code').value = '';
+  document.getElementById('p-village').value = '';
+  
+  document.getElementById('pr-var-1').value='';
+  document.getElementById('pr-grd-1').innerHTML='<option value="">— Select Variety First —</option>';
+  document.getElementById('pr-sacks-1').value='';
+  document.getElementById('pr-prc-1').value='';
+  document.getElementById('pr-qty-1').value='';
+  document.getElementById('pr-tot-1').value='';
+  document.getElementById('pr-tdsp-1').textContent='0 KHR';
+  clearPriceHint(1);
+  
+  document.getElementById('pr-seed-borrowed').value='';
+  document.getElementById('pr-seed-repay-qty').value='';
+  document.getElementById('pr-seed-price').value='';
+  document.getElementById('pr-seed-deduction').value='';
+  document.getElementById('pr-ded-dsp').textContent='0 KHR';
+  
+  document.getElementById('pr-suba').textContent='0 KHR';
+  document.getElementById('pr-subb').textContent='0 KHR';
+  document.getElementById('pr-grand').textContent='0 KHR';
+
+  [1,2].forEach(i=>{
+    document.getElementById('sn-'+i).value='';
+    clrSig(String(i));
+  });
+}
+
+/* ── RENDER PURCHASE HISTORY ─────────────────────── */
+function renderPH() {
+  const srch = (document.getElementById('p-search').value||'').toLowerCase();
+  const filt = purchaseRecs.filter(r=>
+    r.producerName.toLowerCase().includes(srch)||
+    r.familyCode.toLowerCase().includes(srch)||
+    (r.village||'').toLowerCase().includes(srch)||
+    r.date.includes(srch)
+  );
+
+  // Stats
+  document.getElementById('pst-cnt').textContent  = purchaseRecs.length;
+  const tw  = purchaseRecs.reduce((s,r)=>s+(r.totalWeight||0),0);
+  const tp  = purchaseRecs.reduce((s,r)=>s+(r.totalPayment||0),0);
+  const vill= [...new Set(purchaseRecs.map(r=>r.village).filter(Boolean))];
+  document.getElementById('pst-wt').textContent   = tw.toFixed(1)+' kg';
+  document.getElementById('pst-pay').textContent  = fmtKHR(tp);
+  document.getElementById('pst-vill').textContent = vill.length ? vill.length+' village'+(vill.length>1?'s':'') : '—';
+
+  const c = document.getElementById('p-history');
+  if(!filt.length){
+    c.innerHTML = `<div class="empty">
+      <svg width="46" height="46" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      <p>${purchaseRecs.length===0?'No records yet. Fill the form above and click <strong>Save</strong>.':'No records match your search.'}</p>
+    </div>`;
+    return;
+  }
+  c.innerHTML = '<div class="records-grid">'+filt.map(pRecCard).join('')+'</div>';
+}
+
+function pRecCard(r){
+  const dt = fmtDate(r.date);
+  const mainItem = r.items && r.items[0] ? r.items[0] : {};
+  const varDesc = mainItem.variety ? mainItem.variety + (mainItem.grade ? ' (' + mainItem.grade + ')' : '') : 'No Variety';
+  const sacksDesc = mainItem.sacks ? ' · ' + mainItem.sacks + ' sacks' : '';
+  const seedDesc = r.seedBorrowed ? ` · Seed: ${r.seedBorrowed} kg (${fmtKHR(r.seedDeduction)} ded.)` : '';
+  
+  return `<div class="rec-card">
+    <div class="rec-card-hdr">
+      <div><div class="rec-name">${esc(r.producerName)}</div><div class="rec-date">${dt}</div></div>
+      <button class="btn btn-danger btn-xs" onclick="event.stopPropagation();openConfirm('Delete Purchase Record','This will permanently delete this record. Cannot be undone.',()=>deletePurchase('${r.id}'))">✕</button>
+    </div>
+    <div class="rec-meta">
+      <div class="rec-stat">📋 ${esc(r.familyCode)} · ${esc(r.village||'—')}</div>
+      <div class="rec-stat" style="font-size:0.73rem;color:#64748b;">${esc(varDesc)}${sacksDesc}${seedDesc}</div>
+      <div class="rec-stat">⚖️ <strong>${(r.totalWeight||0).toFixed(1)} kg</strong></div>
+    </div>
+    <div class="rec-total">${fmtKHR(r.totalPayment||0)}</div>
+  </div>`;
+}
+
+/* ── TRANSPORT STATUS ────────────────────────────── */
+function setTStatus(status, btn){
+  document.getElementById('t-pstatus').value = status;
+  ['org','conv','other'].forEach(k=>{
+    document.getElementById('tpill-'+k).className='pill';
+  });
+  const map={'Organic':'pill-org','Conversion':'pill-conv','Other':'pill-std'};
+  btn.classList.add(map[status]);
+}
+
+/* ── TRANSPORT ROWS ──────────────────────────────── */
+function addTRowData(data={}){
+  tRows.push({ id:'tr-'+(++rowSeq), variety:'', familyCode:'', village:'', sacks:'', weight:'', ...data });
+}
+function addTRow(){
+  if(tRows.length>=16){ toast('Maximum 16 rows reached.','err'); return; }
+  addTRowData({});
+  renderTRows();
+}
+function removeTRow(id){
+  tRows=tRows.filter(r=>r.id!==id);
+  renderTRows();
+}
+function updateTRow(id, field, val){
+  const r=tRows.find(r=>r.id===id); if(r) r[field]=val;
+}
+
+function renderTRows(){
+  const varOpts = ['','Phka Rumduol','Red Jasmine','Foundation Seed – Red Jasmine','Foundation Seed – Rumduol','Certified Seed','White Rice','Local Variety','Seed Return','Other']
+    .map(v=>`<option value="${esc(v)}">${v||'— Variety —'}</option>`).join('');
+  const villOpts = ['', ...VILLAGES].map(v=>`<option value="${esc(v)}">${v||'— Village —'}</option>`).join('');
+
+  document.getElementById('t-rowcount').textContent = tRows.length+' / 16';
+  
+  if (tRows.length === 0) {
+    document.getElementById('t-tbody').innerHTML = `<tr><td colspan="7" class="empty" style="padding:24px; text-align:center;">No rows added yet. Click <strong>Import</strong> or <strong>Add Row</strong>.</td></tr>`;
+    calcTWeight();
+    return;
+  }
+
+  document.getElementById('t-tbody').innerHTML = tRows.map((r,idx)=>`
+    <tr id="trow-${r.id}">
+      <td class="row-num">${idx+1}</td>
+      <td><select style="min-width:160px;" onchange="updateTRow('${r.id}','variety',this.value)">${varOpts.replace(`value="${esc(r.variety)}"`,`value="${esc(r.variety)}" selected`)}</select></td>
+      <td><input type="text" style="min-width:90px;" value="${esc(r.familyCode)}" placeholder="Code" oninput="updateTRow('${r.id}','familyCode',this.value)"></td>
+      <td><select style="min-width:110px;" onchange="updateTRow('${r.id}','village',this.value)">${villOpts.replace(`value="${esc(r.village)}"`,`value="${esc(r.village)}" selected`)}</select></td>
+      <td><input type="number" style="min-width:68px;" value="${r.sacks||''}" placeholder="0" min="0" oninput="updateTRow('${r.id}','sacks',this.value);calcTWeight()"></td>
+      <td><input type="number" style="min-width:80px;" value="${r.weight||''}" placeholder="0.00" min="0" step="0.01" oninput="updateTRow('${r.id}','weight',this.value);calcTWeight()"></td>
+      <td><button class="btn btn-danger btn-xs" onclick="removeTRow('${r.id}')">✕</button></td>
+    </tr>`).join('');
+  calcTWeight();
+}
+
+function calcTWeight(){
+  let wt=0, sk=0;
+  tRows.forEach(r=>{ wt+=parseFloat(r.weight)||0; sk+=parseInt(r.sacks)||0; });
+  document.getElementById('t-totalwt').textContent   = wt.toFixed(2)+' kg';
+  document.getElementById('t-rowsummary').textContent = tRows.length+' rows · '+sk+' sacks';
+}
+
+/* ── IMPORT PURCHASE → TRANSPORT ─────────────────── */
+function openImport(){
+  importSel.clear();
+  const searchInput = document.getElementById('t-import-search');
+  if(searchInput) searchInput.value = '';
+  renderImportList();
+  document.getElementById('import-modal').classList.add('open');
+}
+function closeImport(){ document.getElementById('import-modal').classList.remove('open'); }
+
+function filterImportList() {
+  const term = document.getElementById('t-import-search').value;
+  renderImportList(term);
+}
+
+function renderImportList(term = '') {
+  const list = document.getElementById('import-list');
+  if(!purchaseRecs.length){
+    list.innerHTML = '<div class="empty" style="padding:24px;"><p>No purchase records found. Save some purchase records first.</p></div>';
+    return;
+  }
+  
+  const cleanTerm = term.toLowerCase().trim();
+  const filtered = purchaseRecs.filter((r, index) => {
+    if(!cleanTerm) return true;
+    
+    const recNum = String(purchaseRecs.length - index);
+    const itemsDesc = r.items.map(it => (it.variety || '')).join(' ');
+    return r.producerName.toLowerCase().includes(cleanTerm) ||
+           r.familyCode.toLowerCase().includes(cleanTerm) ||
+           (r.village || '').toLowerCase().includes(cleanTerm) ||
+           r.date.includes(cleanTerm) ||
+           recNum.includes(cleanTerm) ||
+           itemsDesc.toLowerCase().includes(cleanTerm) ||
+           r.id.includes(cleanTerm);
+  });
+  
+  if(!filtered.length) {
+    list.innerHTML = '<div class="empty" style="padding:24px;"><p>No matching purchase records found.</p></div>';
+    return;
+  }
+  
+  list.innerHTML = filtered.map((r) => {
+    const origIndex = purchaseRecs.findIndex(pr => pr.id === r.id);
+    const recNum = purchaseRecs.length - origIndex;
+    const dt = fmtDate(r.date);
+    const items = r.items.filter(it => it.variety && it.quantity > 0);
+    const isSelected = importSel.has(r.id);
+    
+    return `<div class="import-item ${isSelected ? 'sel' : ''}" id="imp-${r.id}" onclick="toggleImp('${r.id}')">
+      <div class="imp-chk" id="impck-${r.id}">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="white" style="display:${isSelected ? 'block' : 'none'}" id="impckico-${r.id}"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+      </div>
+      <div style="flex:1;">
+        <div style="font-weight:800;font-size:0.88rem;">
+          #${recNum} — ${esc(r.producerName)} <span style="color:var(--muted);font-weight:400;font-size:0.78rem;">(${esc(r.familyCode)})</span>
+        </div>
+        <div style="font-size:0.76rem;color:var(--muted);">${dt} · ${esc(r.village||'—')} · ${items.length} item${items.length!==1?'s':''} · ${(r.totalWeight||0).toFixed(1)} kg</div>
+        <div style="font-size:0.8rem;color:var(--gold);margin-top:2px;">${fmtKHR(r.totalPayment||0)}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleImp(id){
+  const el  = document.getElementById('imp-'+id);
+  const ico = document.getElementById('impckico-'+id);
+  if(importSel.has(id)){
+    importSel.delete(id); el.classList.remove('sel'); if(ico) ico.style.display='none';
+  } else {
+    importSel.add(id);    el.classList.add('sel');    if(ico) ico.style.display='block';
+  }
+}
+
+function doImport(){
+  if(!importSel.size){ toast('Select at least one record.','err'); return; }
+  let added=0;
+  importSel.forEach(id=>{
+    const rec = purchaseRecs.find(r=>r.id===id);
+    if(!rec) return;
+    rec.items.forEach(it=>{
+      if(!it.variety||!it.quantity) return;
+      if(tRows.length>=16) return;
+      addTRowData({ variety:it.variety, familyCode:rec.familyCode, village:rec.village||'', sacks:it.sacks||'', weight:it.quantity, purchaseRecordId:rec.id });
+      added++;
+    });
+  });
+  closeImport();
+  renderTRows();
+  toast('Imported '+added+' row'+(added!==1?'s':'')+' from '+importSel.size+' record'+(importSel.size!==1?'s':'')+'.','ok');
+}
+
+/* ── SAVE TRANSPORT ──────────────────────────────── */
+function saveTransport(){
+  const date   = document.getElementById('t-date').value;
+  const driver = document.getElementById('t-driver').value.trim();
+  const plate  = document.getElementById('t-plate').value.trim();
+  if(!date||!driver||!plate){ toast('Please fill Date, Driver Name, and Plate Number.','err'); return; }
+
+  const rows = tRows.map(r=>({
+    variety:r.variety||'', familyCode:r.familyCode||'', village:r.village||'',
+    sacks: parseInt(r.sacks)||0, weight: parseFloat(r.weight)||0,
+    purchaseRecordId: r.purchaseRecordId||null
+  })).filter(r=>r.variety||r.weight>0);
+
+  const rec = {
+    id: Date.now().toString(),
+    date,
+    paddyStatus: 'Organic',
+    driver, plate,
+    mobile: document.getElementById('t-mobile').value,
+    truckCleaned: document.getElementById('t-clean').checked,
+    fieldStaff: document.getElementById('t-staff').value.trim(),
+    fieldStaffDate: document.getElementById('t-staff-date').value,
+    fieldStaffTime: document.getElementById('t-staff-time').value,
+    driverWitness: document.getElementById('t-driver-witness').value.trim(),
+    driverWitnessDate: document.getElementById('t-driver-witness-date').value,
+    driverWitnessTime: document.getElementById('t-driver-witness-time').value,
+    rows,
+    totalWeight: rows.reduce((s,r)=>s+r.weight,0),
+    totalSacks:  rows.reduce((s,r)=>s+r.sacks,0),
+    signatures: {},
+    createdAt: new Date().toISOString()
+  };
+  transportRecs.unshift(rec);
+  saveData();
+  renderTH();
+  toast('✅ Transport record saved!','ok');
+}
+
+function deleteTransport(id){
+  transportRecs=transportRecs.filter(r=>r.id!==id);
+  saveData(); renderTH();
+  toast('Record deleted.','inf');
+}
+
+function resetTransport(){
+  document.getElementById('t-driver').value='';
+  document.getElementById('t-plate').value='';
+  document.getElementById('t-mobile').value='';
+  document.getElementById('t-clean').checked=false;
+  document.getElementById('t-staff').value='';
+  document.getElementById('t-driver-witness').value='';
+  
+  const today = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const timeStr = now.toTimeString().split(' ')[0].substring(0,5);
+  ['t-staff-date','t-driver-witness-date'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = today;
+  });
+  ['t-staff-time','t-driver-witness-time'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = timeStr;
+  });
+
+  tRows=[];
+  renderTRows();
+}
+
+/* ── RENDER TRANSPORT HISTORY ────────────────────── */
+function renderTH(){
+  const c = document.getElementById('t-history');
+  if(!transportRecs.length){
+    c.innerHTML=`<div class="empty">
+      <svg width="46" height="46" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      <p>No transport records saved yet.</p></div>`;
+    return;
+  }
+  c.innerHTML='<div class="records-grid">'+transportRecs.map(tRecCard).join('')+'</div>';
+}
+
+function tRecCard(r){
+  const dt=fmtDate(r.date);
+  return `<div class="rec-card">
+    <div class="rec-card-hdr">
+      <div><div class="rec-name">🚛 ${esc(r.driver)}</div><div class="rec-date">${dt} · ${esc(r.plate)}</div></div>
+      <button class="btn btn-danger btn-xs" onclick="event.stopPropagation();openConfirm('Delete Transport Record','This record will be permanently deleted.',()=>deleteTransport('${r.id}'))">✕</button>
+    </div>
+    <div class="rec-meta">
+      <div class="rec-stat" style="color:var(--accent);">● Organic Only</div>
+      <div class="rec-stat">📦 ${r.rows.length} lots · ${r.totalSacks} sacks</div>
+      <div class="rec-stat">⚖️ <strong>${(r.totalWeight||0).toFixed(2)} kg</strong></div>
+      ${r.fieldStaff?`<div class="rec-stat" style="font-size:0.73rem;color:var(--muted);">👤 Staff: ${esc(r.fieldStaff)} (${r.fieldStaffTime||'—'})<br>Witness: ${esc(r.driverWitness)} (${r.driverWitnessTime||'—'})</div>`:''}
+      ${r.mobile?`<div class="rec-stat" style="font-size:0.73rem;">📱 ${esc(r.mobile)}</div>`:''}
+    </div>
+  </div>`;
+}
+
+/* ── CSV EXPORTS ─────────────────────────────────── */
+function exportPurchaseCSV(){
+  if(!purchaseRecs.length){ toast('No records to export.','err'); return; }
+  const rows=[['Date','Producer Name','Family Code','Village','Variety','Grade','Unit Price (KHR/kg)','Quantity (kg)','Sacks','Paddy Value (KHR)','Seed Borrowed (kg)','Seed Repayment (kg)','Seed Deduction (KHR)','Net Payment (KHR)']];
+  purchaseRecs.forEach(r=>{
+    const mainItem = r.items && r.items[0] ? r.items[0] : {};
+    const paddyValue = (mainItem.unitPrice || 0) * (mainItem.quantity || 0);
+    const seedBorrowed = r.seedBorrowed || 0;
+    const seedRepayQty = seedBorrowed * 1.10;
+    const seedDeduction = r.seedDeduction || 0;
+    rows.push([
+      r.date, r.producerName, r.familyCode, r.village||'',
+      mainItem.variety||'', mainItem.grade||'', mainItem.unitPrice||0, mainItem.quantity||0, mainItem.sacks||0,
+      paddyValue, seedBorrowed, seedRepayQty, seedDeduction, r.totalPayment||0
+    ]);
+  });
+  dlCSV(rows,'purchase_records_'+new Date().toISOString().split('T')[0]+'.csv');
+  toast('Purchase records exported!','ok');
+}
+
+function exportTransportCSV(){
+  if(!transportRecs.length){ toast('No records to export.','err'); return; }
+  const rows=[['Date','Paddy Status','Driver','Plate','Mobile','Truck Cleaned','Field Staff Name','Field Staff Date','Field Staff Time','Driver Witness Name','Driver Witness Date','Driver Witness Time','Variety','Family Code','Village','Sacks','Weight (kg)','Total Weight (kg)']];
+  transportRecs.forEach(r=>r.rows.forEach(row=>rows.push([
+    r.date,'Organic',r.driver,r.plate,r.mobile,
+    r.truckCleaned?'Yes':'No',
+    r.fieldStaff||'', r.fieldStaffDate||'', r.fieldStaffTime||'',
+    r.driverWitness||'', r.driverWitnessDate||'', r.driverWitnessTime||'',
+    row.variety,row.familyCode,row.village||'',row.sacks,row.weight,
+    r.totalWeight
+  ])));
+  dlCSV(rows,'transport_records_'+new Date().toISOString().split('T')[0]+'.csv');
+  toast('Transport records exported!','ok');
+}
+
+function dlCSV(rows, name){
+  const csv=rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=name; a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ── LOCAL STORAGE ───────────────────────────────── */
+function saveData(){
+  try {
+    localStorage.setItem('ibis_purch', JSON.stringify(purchaseRecs.map(r=>({...r, signatures:Object.fromEntries(Object.entries(r.signatures||{}).map(([k,v])=>[k,{name:v.name,date:v.date,hasDrawing:v.hasDrawing}]))})) ));
+    localStorage.setItem('ibis_trans', JSON.stringify(transportRecs));
+  } catch(e){ toast('Storage limit reached.','err'); }
+}
+function loadData(){
+  try {
+    const p=localStorage.getItem('ibis_purch'); if(p) purchaseRecs=JSON.parse(p);
+    const t=localStorage.getItem('ibis_trans');  if(t) transportRecs=JSON.parse(t);
+  } catch(e){ purchaseRecs=[]; transportRecs=[]; }
+}
+
+/* ── CONFIRM MODAL ───────────────────────────────── */
+function openConfirm(title, msg, cb){
+  document.getElementById('cm-title').textContent=title;
+  document.getElementById('cm-msg').textContent=msg;
+  confirmCb=cb;
+  document.getElementById('cm-ok').onclick=()=>{ closeConfirm(); if(confirmCb) confirmCb(); };
+  document.getElementById('confirm-modal').classList.add('open');
+}
+function closeConfirm(){ document.getElementById('confirm-modal').classList.remove('open'); }
+
+function confirmClear(type){
+  const title = type==='purchase'?'Clear All Purchase Records':'Clear All Transport Records';
+  openConfirm(title,'This will permanently delete ALL records of this type. This cannot be undone.',()=>{
+    if(type==='purchase'){ purchaseRecs=[]; renderPH(); }
+    else { transportRecs=[]; renderTH(); }
+    saveData();
+    toast('All '+type+' records cleared.','inf');
+  });
+}
+
+/* Close overlays on background click */
+['import-modal','confirm-modal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){ if(e.target===this){ if(id==='import-modal') closeImport(); else closeConfirm(); }});
+});
+
+/* ── TOAST ───────────────────────────────────────── */
+function toast(msg, type='inf'){
+  const c=document.getElementById('toasts');
+  const el=document.createElement('div');
+  el.className='toast toast-'+type;
+  el.textContent=msg;
+  c.appendChild(el);
+  setTimeout(()=>el.remove(),3200);
+}
+
+/* ── UTILITIES ───────────────────────────────────── */
+function fmtKHR(n){
+  if(!n||n===0) return '0 KHR';
+  return n.toLocaleString('en-US',{maximumFractionDigits:0})+' KHR';
+}
+function fmtDate(d){
+  if(!d) return '—';
+  try { return new Date(d+'T00:00:00').toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}); }
+  catch(e){ return d; }
+}
+function esc(s){
+  if(!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
