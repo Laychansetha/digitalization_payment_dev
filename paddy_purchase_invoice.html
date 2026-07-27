@@ -482,6 +482,12 @@
       </svg>
       🚛 Transport Record
     </button>
+    <button class="tab-btn" onclick="switchTab('payment')" id="tab-payment">
+      <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+      </svg>
+      💳 Farmer Payment Info
+    </button>
   </nav>
 
   <!-- ═══════════════════════════════════════════════
@@ -502,15 +508,15 @@
         </div>
         <div class="fgroup">
           <label for="p-name">Producer Name</label>
-          <input type="text" id="p-name" placeholder="e.g., Sok San">
+          <input type="text" id="p-name" placeholder="e.g., Sok San" oninput="onFarmerLookup()">
         </div>
         <div class="fgroup">
           <label for="p-code">Family Code</label>
-          <input type="text" id="p-code" placeholder="e.g., TB034">
+          <input type="text" id="p-code" placeholder="e.g., TB034" oninput="onFarmerLookup()">
         </div>
         <div class="fgroup">
           <label for="p-village">Village</label>
-          <select id="p-village">
+          <select id="p-village" onchange="onFarmerLookup()">
             <option value="" disabled selected>Select Village</option>
             <option>Bra</option><option>Damnak Kantout</option><option>Dan</option>
             <option>Dang Phlet</option><option>Kampenh</option><option>Kampong Sangkae</option>
@@ -520,6 +526,20 @@
             <option>Tmat Paeuy</option><option>Yeang</option>
           </select>
         </div>
+      </div>
+
+      <!-- Linked Farmer Payment Badge -->
+      <div id="p-payment-link-card" style="margin-top:14px; padding:12px 14px; background:rgba(59,130,246,0.05); border:1px solid rgba(59,130,246,0.22); border-radius:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:34px; height:34px; border-radius:8px; background:rgba(59,130,246,0.12); display:flex; align-items:center; justify-content:center; color:#3b82f6; flex-shrink:0;">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          </div>
+          <div>
+            <div style="font-size:0.72rem; font-weight:800; color:#3b82f6; text-transform:uppercase; letter-spacing:0.04em;">Farmer Payment Routing</div>
+            <div id="p-payment-link-info" style="font-size:0.84rem; color:var(--text); font-weight:600; margin-top:2px;">Enter Family Code to automatically link registered payment information.</div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-secondary btn-xs" onclick="quickManagePayment()" id="p-payment-link-btn" style="font-size:0.75rem;">💳 Manage Payment Info</button>
       </div>
     </div>
 
@@ -559,9 +579,22 @@
             <select id="pr-grd-1" onchange="onGrade(1)"><option value="">— Select Variety First —</option></select>
           </div>
           <div class="fgroup">
-            <label>Unit Price (KHR/kg)</label>
+            <label for="pr-prc-1">Standard Price (KHR/kg)</label>
             <input type="number" id="pr-prc-1" placeholder="0" min="0" step="0.5" oninput="calcRow(1)">
             <div class="price-hint" id="pr-phint-1"></div>
+          </div>
+        </div>
+
+        <div class="fg fg-2" style="margin-bottom:14px;">
+          <div class="fgroup">
+            <label for="pr-prem-1">Additional Price / Premium (KHR/kg)</label>
+            <input type="number" id="pr-prem-1" placeholder="0" min="0" step="0.5" oninput="calcRow(1)">
+            <div style="font-size:0.72rem; color:var(--muted); margin-top:2px;">Manual extra transport, ferry, or distance fee per kg</div>
+          </div>
+          <div class="fgroup">
+            <label for="pr-final-prc-1">Final Purchase Price (KHR/kg) (Auto)</label>
+            <input type="number" id="pr-final-prc-1" readonly placeholder="0" style="color:var(--accent); font-weight:800; cursor:default;">
+            <div class="price-hint" id="pr-final-hint-1" style="color:var(--accent);">Standard Price + Additional Price</div>
           </div>
         </div>
 
@@ -899,6 +932,170 @@
     </div>
   </div><!-- /transport tab -->
 
+  <!-- ═══════════════════════════════════════════════
+       FARMER PAYMENT INFO TAB
+  ══════════════════════════════════════════════════ -->
+  <div class="tab-content" id="content-payment">
+
+    <!-- Stats Summary -->
+    <div class="card">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-lbl">Registered Profiles</div>
+          <div class="stat-val green" id="pay-st-cnt">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-lbl">Bank Transfers</div>
+          <div class="stat-val green" id="pay-st-bank">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-lbl">Cash Payments</div>
+          <div class="stat-val gold" id="pay-st-cash">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-lbl">Villages Covered</div>
+          <div class="stat-val" id="pay-st-vill">0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Profile Registration Form -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="19" height="19" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+        </svg>
+        Register / Edit Farmer Payment Profile
+      </div>
+      <input type="hidden" id="pay-editing-id" value="">
+
+      <!-- Basic Info -->
+      <div class="fg fg-4" style="margin-bottom:14px;">
+        <div class="fgroup">
+          <label for="pay-code">Farmer ID / Family Code <span style="color:var(--danger)">*</span></label>
+          <input type="text" id="pay-code" placeholder="e.g. TB034">
+        </div>
+        <div class="fgroup">
+          <label for="pay-name">Producer Name <span style="color:var(--danger)">*</span></label>
+          <input type="text" id="pay-name" placeholder="e.g. Sok San">
+        </div>
+        <div class="fgroup">
+          <label for="pay-village">Village</label>
+          <select id="pay-village">
+            <option value="">— Select Village —</option>
+            <option>Bra</option><option>Damnak Kantout</option><option>Dan</option>
+            <option>Dang Phlet</option><option>Kampenh</option><option>Kampong Sangkae</option>
+            <option>Kham Keut</option><option>Kong Yoang</option><option>Krala Peas</option>
+            <option>Narong</option><option>Okak</option><option>Pongro</option>
+            <option>Prey Veng</option><option>Sambou</option><option>Soung</option>
+            <option>Tmat Paeuy</option><option>Yeang</option>
+          </select>
+        </div>
+        <div class="fgroup">
+          <label for="pay-phone">Phone Number (Optional)</label>
+          <input type="text" id="pay-phone" placeholder="e.g. 012 345 678">
+        </div>
+      </div>
+
+      <!-- Payment Method & Bank Info -->
+      <div class="fg fg-3" style="margin-bottom:14px;">
+        <div class="fgroup">
+          <label for="pay-method">Payment Method <span style="color:var(--danger)">*</span></label>
+          <select id="pay-method" onchange="onPaymentMethodChange()">
+            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="Cash">Cash</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="fgroup" id="pay-grp-bank">
+          <label for="pay-bank">Bank Name</label>
+          <select id="pay-bank">
+            <option value="ABA Bank">ABA Bank</option>
+            <option value="ACLEDA Bank">ACLEDA Bank</option>
+            <option value="Wing Bank">Wing Bank</option>
+            <option value="Canadia Bank">Canadia Bank</option>
+            <option value="Sathapana Bank">Sathapana Bank</option>
+            <option value="HATTHA Bank">HATTHA Bank</option>
+            <option value="Phillip Bank">Phillip Bank</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="fgroup" id="pay-grp-acc">
+          <label for="pay-acc-num">Account Number</label>
+          <input type="text" id="pay-acc-num" placeholder="e.g. 000 123 456">
+        </div>
+      </div>
+
+      <!-- Account Holder & Relationship -->
+      <div class="fg fg-3" style="margin-bottom:14px;">
+        <div class="fgroup" id="pay-grp-holder">
+          <label for="pay-acc-holder">Account Holder Name</label>
+          <input type="text" id="pay-acc-holder" placeholder="e.g. Sok Channa">
+        </div>
+        <div class="fgroup" id="pay-grp-relation">
+          <label for="pay-relation">Relationship to Farmer</label>
+          <select id="pay-relation">
+            <option value="Self">Self (Farmer's Own Account)</option>
+            <option value="Wife">Wife</option>
+            <option value="Husband">Husband</option>
+            <option value="Son">Son</option>
+            <option value="Daughter">Daughter</option>
+            <option value="Brother">Brother</option>
+            <option value="Sister">Sister</option>
+            <option value="Parent">Parent</option>
+            <option value="Other">Other Trusted Relative</option>
+          </select>
+        </div>
+        <div class="fgroup">
+          <label for="pay-notes">Notes / Instructions</label>
+          <input type="text" id="pay-notes" placeholder="Optional notes for Finance team">
+        </div>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="actions-bar" style="justify-content:flex-end;">
+        <button type="button" class="btn btn-secondary" onclick="resetFarmerProfile()">Reset Form</button>
+        <button type="button" class="btn btn-primary" onclick="saveFarmerProfile()">
+          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+          Save Payment Profile
+        </button>
+      </div>
+    </div>
+
+    <!-- Profiles Database & History -->
+    <div class="card">
+      <div class="hist-header">
+        <div class="card-title" style="margin:0;padding:0;border:none;">
+          <svg width="19" height="19" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          Farmer Payment Profiles Database
+        </div>
+        <div class="actions-bar" style="gap:8px;">
+          <button class="btn btn-secondary btn-sm" onclick="exportFarmerProfilesCSV()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Export Finance CSV
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="confirmClear('payment')">Clear All</button>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div style="display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap;">
+        <div class="search-wrap" style="flex:1; min-width:220px;">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <input type="text" id="pay-search" placeholder="Search by ID, name, bank, account..." oninput="renderFarmerProfiles()">
+        </div>
+        <select id="pay-filter-method" onchange="renderFarmerProfiles()" style="max-width:180px;">
+          <option value="">All Payment Methods</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="Cash">Cash</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div id="pay-history"></div>
+    </div>
+  </div><!-- /payment tab -->
+
 </div><!-- /container -->
 
 <!-- ── IMPORT MODAL ───────────────────────────────── -->
@@ -983,6 +1180,7 @@ const VILLAGES = ["Bra","Damnak Kantout","Dan","Dang Phlet","Kampenh","Kampong S
 /* ── STATE ───────────────────────────────────────── */
 let purchaseRecs = [];
 let transportRecs = [];
+let farmerProfiles = [];
 let tRows = [];
 let sigPads = {};
 let confirmCb = null;
@@ -1006,6 +1204,8 @@ window.addEventListener('DOMContentLoaded', () => {
   renderTRows();
   renderPH();
   renderTH();
+  renderFarmerProfiles();
+  onFarmerLookup();
   updateSackTotals(1);
 });
 
@@ -1128,9 +1328,28 @@ function clearPriceHint(row) {
 }
 
 function calcRow(row) {
-  const price = parseFloat(document.getElementById('pr-prc-'+row).value) || 0;
-  const qty   = parseFloat(document.getElementById('pr-qty-'+row).value)  || 0;
-  const tot   = price * qty;
+  const stdPrice = parseFloat(document.getElementById('pr-prc-'+row).value) || 0;
+  const premium  = parseFloat(document.getElementById('pr-prem-'+row).value) || 0;
+  const finalPrice = stdPrice + premium;
+  const qty      = parseFloat(document.getElementById('pr-qty-'+row).value)  || 0;
+
+  const finalEl   = document.getElementById('pr-final-prc-'+row);
+  const finalHint = document.getElementById('pr-final-hint-'+row);
+
+  if (finalEl) {
+    finalEl.value = (stdPrice > 0 || premium > 0) ? finalPrice : '';
+  }
+  if (finalHint) {
+    if (premium > 0) {
+      finalHint.textContent = `${stdPrice.toLocaleString()} std + ${premium.toLocaleString()} premium = ${finalPrice.toLocaleString()} KHR/kg`;
+    } else if (stdPrice > 0) {
+      finalHint.textContent = `${stdPrice.toLocaleString()} KHR/kg final price`;
+    } else {
+      finalHint.textContent = 'Standard Price + Additional Price';
+    }
+  }
+
+  const tot = finalPrice * qty;
   document.getElementById('pr-tot-'+row).value  = tot > 0 ? fmtKHR(tot) : '';
   document.getElementById('pr-tdsp-'+row).textContent = tot > 0 ? fmtKHR(tot) : '0 KHR';
   calcSeedDeduction();
@@ -1138,13 +1357,13 @@ function calcRow(row) {
 
 function calcSeedDeduction() {
   const borrowed = parseFloat(document.getElementById('pr-seed-borrowed').value) || 0;
-  const price = parseFloat(document.getElementById('pr-prc-1').value) || 0;
+  const stdPrice = parseFloat(document.getElementById('pr-prc-1').value) || 0;
   
   const repayQty = borrowed * 1.10;
-  const deduction = repayQty * price;
+  const deduction = repayQty * stdPrice;
   
   document.getElementById('pr-seed-repay-qty').value = borrowed > 0 ? repayQty.toFixed(2) + ' kg' : '';
-  document.getElementById('pr-seed-price').value = price > 0 ? price : '';
+  document.getElementById('pr-seed-price').value = stdPrice > 0 ? stdPrice : '';
   document.getElementById('pr-seed-deduction').value = deduction > 0 ? fmtKHR(deduction) : '';
   document.getElementById('pr-ded-dsp').textContent = deduction > 0 ? '-' + fmtKHR(deduction) : '0 KHR';
   
@@ -1152,13 +1371,15 @@ function calcSeedDeduction() {
 }
 
 function calcTotals() {
-  const price = parseFloat(document.getElementById('pr-prc-1').value) || 0;
-  const qty = parseFloat(document.getElementById('pr-qty-1').value) || 0;
-  const paddyValue = price * qty;
+  const stdPrice   = parseFloat(document.getElementById('pr-prc-1').value) || 0;
+  const premium    = parseFloat(document.getElementById('pr-prem-1').value) || 0;
+  const finalPrice = stdPrice + premium;
+  const qty        = parseFloat(document.getElementById('pr-qty-1').value) || 0;
+  const paddyValue = finalPrice * qty;
   
-  const borrowed = parseFloat(document.getElementById('pr-seed-borrowed').value) || 0;
-  const repayQty = borrowed * 1.10;
-  const deduction = repayQty * price;
+  const borrowed   = parseFloat(document.getElementById('pr-seed-borrowed').value) || 0;
+  const repayQty   = borrowed * 1.10;
+  const deduction  = repayQty * stdPrice;
   
   const grandTotal = paddyValue - deduction;
   
@@ -1242,7 +1463,9 @@ function savePurchase() {
   const paddyVariety = document.getElementById('pr-var-1').value;
   const paddyGrade = document.getElementById('pr-grd-1').value;
   const paddySacks = parseInt(document.getElementById('pr-sacks-1').value) || 0;
-  const paddyPrice = parseFloat(document.getElementById('pr-prc-1').value) || 0;
+  const stdPrice = parseFloat(document.getElementById('pr-prc-1').value) || 0;
+  const addPrice = parseFloat(document.getElementById('pr-prem-1').value) || 0;
+  const finalPrice = stdPrice + addPrice;
   const paddyWeight = parseFloat(document.getElementById('pr-qty-1').value) || 0;
   
   if(!paddyVariety){ toast('Please select Paddy Variety.','err'); return; }
@@ -1252,8 +1475,9 @@ function savePurchase() {
 
   const seedBorrowed = parseFloat(document.getElementById('pr-seed-borrowed').value) || 0;
   const seedRepayQty = seedBorrowed * 1.10;
-  const seedDeduction = seedRepayQty * paddyPrice;
-  const netPayment = (paddyPrice * paddyWeight) - seedDeduction;
+  const seedDeduction = seedRepayQty * stdPrice;
+  const paddyValue = finalPrice * paddyWeight;
+  const netPayment = paddyValue - seedDeduction;
 
   const items = [
     {
@@ -1261,11 +1485,14 @@ function savePurchase() {
       variety: paddyVariety,
       grade: paddyGrade,
       status: 'Organic',
-      unitPrice: paddyPrice,
+      standardPrice: stdPrice,
+      additionalPrice: addPrice,
+      finalPrice: finalPrice,
+      unitPrice: finalPrice,
       quantity: paddyWeight,
       sacks: paddySacks,
       sackWeights: [...sackWeights],
-      total: paddyPrice * paddyWeight
+      total: paddyValue
     }
   ];
 
@@ -1313,6 +1540,10 @@ function resetPurchase(){
   document.getElementById('pr-grd-1').innerHTML='<option value="">— Select Variety First —</option>';
   clearSacks(1);
   document.getElementById('pr-prc-1').value='';
+  document.getElementById('pr-prem-1').value='';
+  document.getElementById('pr-final-prc-1').value='';
+  const fh = document.getElementById('pr-final-hint-1');
+  if(fh) fh.textContent = 'Standard Price + Additional Price';
   document.getElementById('pr-tot-1').value='';
   document.getElementById('pr-tdsp-1').textContent='0 KHR';
   clearPriceHint(1);
@@ -1370,6 +1601,11 @@ function pRecCard(r){
   const sacksDesc = mainItem.sacks ? ' · ' + mainItem.sacks + ' sacks' : '';
   const seedDesc = r.seedBorrowed ? ` · Seed: ${r.seedBorrowed} kg (${fmtKHR(r.seedDeduction)} ded.)` : '';
   
+  const stdP = mainItem.standardPrice !== undefined ? mainItem.standardPrice : (mainItem.unitPrice || 0);
+  const addP = mainItem.additionalPrice || 0;
+  const finalP = mainItem.finalPrice !== undefined ? mainItem.finalPrice : (mainItem.unitPrice || 0);
+  const priceDetail = addP > 0 ? ` · Rate: ${stdP.toLocaleString()} + ${addP.toLocaleString()} prem (${finalP.toLocaleString()} KHR/kg)` : (finalP > 0 ? ` · Rate: ${finalP.toLocaleString()} KHR/kg` : '');
+
   return `<div class="rec-card">
     <div class="rec-card-hdr">
       <div><div class="rec-name">${esc(r.producerName)}</div><div class="rec-date">${dt}</div></div>
@@ -1378,7 +1614,7 @@ function pRecCard(r){
     <div class="rec-meta">
       <div class="rec-stat">📋 ${esc(r.familyCode)} · ${esc(r.village||'—')}</div>
       <div class="rec-stat" style="font-size:0.73rem;color:#64748b;">${esc(varDesc)}${sacksDesc}${seedDesc}</div>
-      <div class="rec-stat">⚖️ <strong>${(r.totalWeight||0).toFixed(1)} kg</strong></div>
+      <div class="rec-stat">⚖️ <strong>${(r.totalWeight||0).toFixed(1)} kg</strong>${esc(priceDetail)}</div>
     </div>
     <div class="rec-total">${fmtKHR(r.totalPayment||0)}</div>
   </div>`;
@@ -1819,16 +2055,19 @@ function closeTransportDetails() {
 /* ── CSV EXPORTS ─────────────────────────────────── */
 function exportPurchaseCSV(){
   if(!purchaseRecs.length){ toast('No records to export.','err'); return; }
-  const rows=[['Date','Producer Name','Family Code','Village','Variety','Grade','Unit Price (KHR/kg)','Quantity (kg)','Sacks','Paddy Value (KHR)','Seed Borrowed (kg)','Seed Repayment (kg)','Seed Deduction (KHR)','Net Payment (KHR)']];
+  const rows=[['Date','Producer Name','Family Code','Village','Variety','Grade','Standard Price (KHR/kg)','Additional Price/Premium (KHR/kg)','Final Purchase Price (KHR/kg)','Quantity (kg)','Sacks','Paddy Value (KHR)','Seed Borrowed (kg)','Seed Repayment (kg)','Seed Deduction (KHR)','Net Payment (KHR)']];
   purchaseRecs.forEach(r=>{
     const mainItem = r.items && r.items[0] ? r.items[0] : {};
-    const paddyValue = (mainItem.unitPrice || 0) * (mainItem.quantity || 0);
+    const stdP = mainItem.standardPrice !== undefined ? mainItem.standardPrice : (mainItem.unitPrice || 0);
+    const addP = mainItem.additionalPrice || 0;
+    const finalP = mainItem.finalPrice !== undefined ? mainItem.finalPrice : (mainItem.unitPrice || 0);
+    const paddyValue = finalP * (mainItem.quantity || 0);
     const seedBorrowed = r.seedBorrowed || 0;
     const seedRepayQty = seedBorrowed * 1.10;
     const seedDeduction = r.seedDeduction || 0;
     rows.push([
       r.date, r.producerName, r.familyCode, r.village||'',
-      mainItem.variety||'', mainItem.grade||'', mainItem.unitPrice||0, mainItem.quantity||0, mainItem.sacks||0,
+      mainItem.variety||'', mainItem.grade||'', stdP, addP, finalP, mainItem.quantity||0, mainItem.sacks||0,
       paddyValue, seedBorrowed, seedRepayQty, seedDeduction, r.totalPayment||0
     ]);
   });
@@ -1865,13 +2104,333 @@ function saveData(){
   try {
     localStorage.setItem('ibis_purch', JSON.stringify(purchaseRecs.map(r=>({...r, signatures:Object.fromEntries(Object.entries(r.signatures||{}).map(([k,v])=>[k,{name:v.name,date:v.date,hasDrawing:v.hasDrawing}]))})) ));
     localStorage.setItem('ibis_trans', JSON.stringify(transportRecs));
+    localStorage.setItem('ibis_farmer_payments', JSON.stringify(farmerProfiles));
   } catch(e){ toast('Storage limit reached.','err'); }
 }
 function loadData(){
   try {
     const p=localStorage.getItem('ibis_purch'); if(p) purchaseRecs=JSON.parse(p);
     const t=localStorage.getItem('ibis_trans');  if(t) transportRecs=JSON.parse(t);
-  } catch(e){ purchaseRecs=[]; transportRecs=[]; }
+    const fp=localStorage.getItem('ibis_farmer_payments');
+    if(fp) {
+      farmerProfiles=JSON.parse(fp);
+    } else {
+      farmerProfiles = [
+        {
+          farmerId: "TB034",
+          producerName: "Sok San",
+          village: "Bra",
+          paymentMethod: "Bank Transfer",
+          bankName: "ABA Bank",
+          accountNumber: "000 123 456",
+          accountHolderName: "Sok Channa",
+          relationship: "Wife",
+          phoneNumber: "012 345 678",
+          notes: "Ferry crossing area",
+          updatedAt: new Date().toISOString()
+        },
+        {
+          farmerId: "TB012",
+          producerName: "Chan Dara",
+          village: "Dang Phlet",
+          paymentMethod: "Bank Transfer",
+          bankName: "ACLEDA Bank",
+          accountNumber: "5544 3322 1100",
+          accountHolderName: "Chan Dara",
+          relationship: "Self",
+          phoneNumber: "097 888 999",
+          notes: "Direct farmer bank account",
+          updatedAt: new Date().toISOString()
+        }
+      ];
+      saveData();
+    }
+  } catch(e){ purchaseRecs=[]; transportRecs=[]; farmerProfiles=[]; }
+}
+
+/* ── FARMER PAYMENT MODULE LOGIC ─────────────────── */
+function onPaymentMethodChange() {
+  const method = document.getElementById('pay-method').value;
+  const grpBank = document.getElementById('pay-grp-bank');
+  const grpAcc = document.getElementById('pay-grp-acc');
+  const grpHolder = document.getElementById('pay-grp-holder');
+  const grpRelation = document.getElementById('pay-grp-relation');
+
+  if (method === 'Bank Transfer') {
+    if (grpBank) grpBank.style.display = '';
+    if (grpAcc) grpAcc.style.display = '';
+    if (grpHolder) grpHolder.style.display = '';
+    if (grpRelation) grpRelation.style.display = '';
+  } else if (method === 'Cash') {
+    if (grpBank) grpBank.style.display = 'none';
+    if (grpAcc) grpAcc.style.display = 'none';
+    if (grpHolder) grpHolder.style.display = 'none';
+    if (grpRelation) grpRelation.style.display = 'none';
+  } else {
+    if (grpBank) grpBank.style.display = '';
+    if (grpAcc) grpAcc.style.display = '';
+    if (grpHolder) grpHolder.style.display = '';
+    if (grpRelation) grpRelation.style.display = '';
+  }
+}
+
+function saveFarmerProfile() {
+  const code = document.getElementById('pay-code').value.trim();
+  const name = document.getElementById('pay-name').value.trim();
+  const village = document.getElementById('pay-village').value;
+  const phone = document.getElementById('pay-phone').value.trim();
+  const method = document.getElementById('pay-method').value;
+  const bank = document.getElementById('pay-bank').value;
+  const accNum = document.getElementById('pay-acc-num').value.trim();
+  const holder = document.getElementById('pay-acc-holder').value.trim();
+  const relation = document.getElementById('pay-relation').value;
+  const notes = document.getElementById('pay-notes').value.trim();
+  const editingId = document.getElementById('pay-editing-id').value;
+
+  if (!code || !name) {
+    toast('Please fill in Farmer ID / Family Code and Producer Name.', 'err');
+    return;
+  }
+
+  const normCode = code.toUpperCase();
+  const existingIndex = farmerProfiles.findIndex(p => p.farmerId.toUpperCase() === normCode);
+
+  const profileData = {
+    farmerId: normCode,
+    producerName: name,
+    village: village || '',
+    paymentMethod: method,
+    bankName: method === 'Bank Transfer' ? bank : (method === 'Cash' ? 'Cash' : bank),
+    accountNumber: method === 'Bank Transfer' ? (accNum || '—') : '—',
+    accountHolderName: method === 'Bank Transfer' ? (holder || name) : name,
+    relationship: method === 'Bank Transfer' ? relation : 'Self',
+    phoneNumber: phone || '',
+    notes: notes || '',
+    updatedAt: new Date().toISOString()
+  };
+
+  if (editingId) {
+    const targetIdx = farmerProfiles.findIndex(p => p.farmerId === editingId);
+    if (targetIdx >= 0) {
+      farmerProfiles[targetIdx] = profileData;
+    } else {
+      farmerProfiles.unshift(profileData);
+    }
+  } else if (existingIndex >= 0) {
+    farmerProfiles[existingIndex] = profileData;
+  } else {
+    farmerProfiles.unshift(profileData);
+  }
+
+  saveData();
+  renderFarmerProfiles();
+  resetFarmerProfile();
+  onFarmerLookup();
+  toast('✅ Farmer payment profile saved!', 'ok');
+}
+
+function editFarmerProfile(farmerId) {
+  const prof = farmerProfiles.find(p => p.farmerId === farmerId);
+  if (!prof) return;
+  document.getElementById('pay-editing-id').value = prof.farmerId;
+  document.getElementById('pay-code').value = prof.farmerId;
+  document.getElementById('pay-name').value = prof.producerName;
+  document.getElementById('pay-village').value = prof.village || '';
+  document.getElementById('pay-phone').value = prof.phoneNumber || '';
+  document.getElementById('pay-method').value = prof.paymentMethod || 'Bank Transfer';
+  document.getElementById('pay-bank').value = prof.bankName || 'ABA Bank';
+  document.getElementById('pay-acc-num').value = prof.accountNumber !== '—' ? prof.accountNumber : '';
+  document.getElementById('pay-acc-holder').value = prof.accountHolderName || '';
+  document.getElementById('pay-relation').value = prof.relationship || 'Self';
+  document.getElementById('pay-notes').value = prof.notes || '';
+  onPaymentMethodChange();
+  
+  switchTab('payment');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  toast('Loaded payment profile for ' + prof.producerName, 'inf');
+}
+
+function deleteFarmerProfile(farmerId) {
+  farmerProfiles = farmerProfiles.filter(p => p.farmerId !== farmerId);
+  saveData();
+  renderFarmerProfiles();
+  onFarmerLookup();
+  toast('Payment profile deleted.', 'inf');
+}
+
+function resetFarmerProfile() {
+  document.getElementById('pay-editing-id').value = '';
+  document.getElementById('pay-code').value = '';
+  document.getElementById('pay-name').value = '';
+  document.getElementById('pay-village').value = '';
+  document.getElementById('pay-phone').value = '';
+  document.getElementById('pay-method').value = 'Bank Transfer';
+  document.getElementById('pay-bank').value = 'ABA Bank';
+  document.getElementById('pay-acc-num').value = '';
+  document.getElementById('pay-acc-holder').value = '';
+  document.getElementById('pay-relation').value = 'Self';
+  document.getElementById('pay-notes').value = '';
+  onPaymentMethodChange();
+}
+
+function renderFarmerProfiles() {
+  const srch = (document.getElementById('pay-search') ? document.getElementById('pay-search').value : '').toLowerCase();
+  const filtMethod = document.getElementById('pay-filter-method') ? document.getElementById('pay-filter-method').value : '';
+
+  const filt = farmerProfiles.filter(p => {
+    const mCode = p.farmerId.toLowerCase().includes(srch);
+    const mName = p.producerName.toLowerCase().includes(srch);
+    const mBank = (p.bankName || '').toLowerCase().includes(srch);
+    const mAcc  = (p.accountNumber || '').toLowerCase().includes(srch);
+    const mHolder = (p.accountHolderName || '').toLowerCase().includes(srch);
+    const mVill = (p.village || '').toLowerCase().includes(srch);
+
+    const matchesSrch = !srch || mCode || mName || mBank || mAcc || mHolder || mVill;
+    const matchesMethod = !filtMethod || p.paymentMethod === filtMethod;
+    return matchesSrch && matchesMethod;
+  });
+
+  // Stats
+  const cntEl = document.getElementById('pay-st-cnt');
+  const bankEl = document.getElementById('pay-st-bank');
+  const cashEl = document.getElementById('pay-st-cash');
+  const villEl = document.getElementById('pay-st-vill');
+
+  if (cntEl) cntEl.textContent = farmerProfiles.length;
+  if (bankEl) bankEl.textContent = farmerProfiles.filter(p => p.paymentMethod === 'Bank Transfer').length;
+  if (cashEl) cashEl.textContent = farmerProfiles.filter(p => p.paymentMethod === 'Cash').length;
+  
+  const uniqueVillages = [...new Set(farmerProfiles.map(p => p.village).filter(Boolean))];
+  if (villEl) villEl.textContent = uniqueVillages.length;
+
+  const c = document.getElementById('pay-history');
+  if (!c) return;
+
+  if (!filt.length) {
+    c.innerHTML = `<div class="empty">
+      <svg width="46" height="46" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      <p>${farmerProfiles.length === 0 ? 'No farmer payment profiles registered yet. Fill the form above and click <strong>Save</strong>.' : 'No profiles match your search filters.'}</p>
+    </div>`;
+    return;
+  }
+
+  c.innerHTML = '<div class="records-grid">' + filt.map(p => {
+    const isBank = p.paymentMethod === 'Bank Transfer';
+    const badgeColor = isBank ? '#3b82f6' : (p.paymentMethod === 'Cash' ? '#f59e0b' : '#10b981');
+    const badgeBg = isBank ? 'rgba(59,130,246,0.1)' : (p.paymentMethod === 'Cash' ? 'rgba(245,158,11,0.1)' : 'rgba(16,185,129,0.1)');
+    const relTag = p.relationship && p.relationship !== 'Self' ? `<span style="font-size:0.7rem; padding:2px 6px; background:rgba(255,255,255,0.06); border-radius:4px; color:var(--gold); font-weight:700;">Relation: ${esc(p.relationship)}</span>` : '<span style="font-size:0.7rem; padding:2px 6px; background:rgba(255,255,255,0.06); border-radius:4px; color:var(--accent);">Self</span>';
+
+    return `<div class="rec-card" style="border-left:4px solid ${badgeColor};">
+      <div class="rec-card-hdr">
+        <div>
+          <div style="font-size:0.72rem; font-weight:800; color:${badgeColor}; text-transform:uppercase; letter-spacing:0.04em;">🆔 ${esc(p.farmerId)}</div>
+          <div class="rec-name" style="margin-top:2px;">${esc(p.producerName)}</div>
+        </div>
+        <div style="display:flex; gap:4px;">
+          <button class="btn btn-secondary btn-xs" onclick="editFarmerProfile('${esc(p.farmerId)}')">✏️ Edit</button>
+          <button class="btn btn-danger btn-xs" onclick="event.stopPropagation();openConfirm('Delete Payment Profile','Delete payment profile for ${esc(p.producerName)} (${esc(p.farmerId)})?',()=>deleteFarmerProfile('${esc(p.farmerId)}'))">✕</button>
+        </div>
+      </div>
+      <div class="rec-meta">
+        <div class="rec-stat">📍 ${esc(p.village || '—')}${p.phoneNumber ? ' · 📞 ' + esc(p.phoneNumber) : ''}</div>
+        <div style="margin-top:6px; padding:8px 10px; background:${badgeBg}; border-radius:6px; border:1px solid ${badgeColor}33;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong style="font-size:0.83rem; color:${badgeColor};">${isBank ? esc(p.bankName) : esc(p.paymentMethod)}</strong>
+            ${relTag}
+          </div>
+          ${isBank ? `
+            <div style="font-size:0.85rem; font-weight:800; font-family:monospace; color:var(--text); margin-top:4px;">${esc(p.accountNumber)}</div>
+            <div style="font-size:0.74rem; color:var(--muted); margin-top:2px;">Holder: <strong style="color:var(--text);">${esc(p.accountHolderName)}</strong></div>
+          ` : `<div style="font-size:0.78rem; color:var(--muted); margin-top:2px;">Cash disbursement at collection point</div>`}
+        </div>
+        ${p.notes ? `<div style="font-size:0.73rem; color:var(--muted); margin-top:6px; font-style:italic;">📝 ${esc(p.notes)}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('') + '</div>';
+}
+
+function onFarmerLookup() {
+  const codeInput = document.getElementById('p-code');
+  const nameInput = document.getElementById('p-name');
+  const villageSelect = document.getElementById('p-village');
+  const linkInfo = document.getElementById('p-payment-link-info');
+  const linkBtn = document.getElementById('p-payment-link-btn');
+  if (!linkInfo) return;
+
+  const codeVal = (codeInput ? codeInput.value : '').trim().toUpperCase();
+  const nameVal = (nameInput ? nameInput.value : '').trim().toLowerCase();
+
+  let match = null;
+  if (codeVal) {
+    match = farmerProfiles.find(p => p.farmerId.toUpperCase() === codeVal);
+  }
+  if (!match && nameVal) {
+    match = farmerProfiles.find(p => p.producerName.toLowerCase() === nameVal);
+  }
+
+  if (match) {
+    if (villageSelect && match.village && !villageSelect.value) {
+      villageSelect.value = match.village;
+    }
+    let detailStr = '';
+    if (match.paymentMethod === 'Bank Transfer') {
+      detailStr = `💳 <strong>${esc(match.bankName)}</strong> · Acc: <strong style="font-family:monospace;">${esc(match.accountNumber)}</strong> · Holder: <strong>${esc(match.accountHolderName)}</strong> (${esc(match.relationship)})`;
+    } else if (match.paymentMethod === 'Cash') {
+      detailStr = `💵 <strong>Cash Payment</strong> · Direct cash to farmer`;
+    } else {
+      detailStr = `📌 <strong>${esc(match.paymentMethod)}</strong> · ${esc(match.bankName || '')}`;
+    }
+    linkInfo.innerHTML = detailStr;
+    if (linkBtn) linkBtn.textContent = '✏️ Edit Payment Info';
+  } else if (codeVal || nameVal) {
+    linkInfo.innerHTML = `<span style="color:var(--muted); font-style:italic;">No payment profile registered for Family Code "${esc(codeVal || nameVal)}". Click button to add.</span>`;
+    if (linkBtn) linkBtn.textContent = '➕ Register Payment Info';
+  } else {
+    linkInfo.innerHTML = `Enter Family Code to automatically link registered payment information.`;
+    if (linkBtn) linkBtn.textContent = '💳 Manage Payment Info';
+  }
+}
+
+function quickManagePayment() {
+  const codeVal = (document.getElementById('p-code').value || '').trim();
+  const nameVal = (document.getElementById('p-name').value || '').trim();
+  const villageVal = document.getElementById('p-village').value;
+
+  switchTab('payment');
+
+  let match = null;
+  if (codeVal) match = farmerProfiles.find(p => p.farmerId.toUpperCase() === codeVal.toUpperCase());
+
+  if (match) {
+    editFarmerProfile(match.farmerId);
+  } else {
+    resetFarmerProfile();
+    if (codeVal) document.getElementById('pay-code').value = codeVal;
+    if (nameVal) document.getElementById('pay-name').value = nameVal;
+    if (villageVal) document.getElementById('pay-village').value = villageVal;
+  }
+}
+
+function exportFarmerProfilesCSV() {
+  if (!farmerProfiles.length) { toast('No payment profiles to export.', 'err'); return; }
+  const rows = [['Farmer ID / Family Code', 'Producer Name', 'Village', 'Payment Method', 'Bank Name', 'Account Number', 'Account Holder Name', 'Relationship to Farmer', 'Phone Number', 'Notes', 'Last Updated']];
+  farmerProfiles.forEach(p => {
+    rows.push([
+      p.farmerId,
+      p.producerName,
+      p.village || '',
+      p.paymentMethod || '',
+      p.bankName || '',
+      p.accountNumber || '',
+      p.accountHolderName || '',
+      p.relationship || 'Self',
+      p.phoneNumber || '',
+      p.notes || '',
+      p.updatedAt || ''
+    ]);
+  });
+  dlCSV(rows, 'farmer_payment_profiles_' + new Date().toISOString().split('T')[0] + '.csv');
+  toast('Farmer payment profiles exported!', 'ok');
 }
 
 /* ── CONFIRM MODAL ───────────────────────────────── */
@@ -1885,10 +2444,11 @@ function openConfirm(title, msg, cb){
 function closeConfirm(){ document.getElementById('confirm-modal').classList.remove('open'); }
 
 function confirmClear(type){
-  const title = type==='purchase'?'Clear All Purchase Records':'Clear All Transport Records';
+  const title = type==='purchase'?'Clear All Purchase Records':(type==='transport'?'Clear All Transport Records':'Clear All Farmer Payment Profiles');
   openConfirm(title,'This will permanently delete ALL records of this type. This cannot be undone.',()=>{
     if(type==='purchase'){ purchaseRecs=[]; renderPH(); }
-    else { transportRecs=[]; renderTH(); }
+    else if(type==='transport'){ transportRecs=[]; renderTH(); }
+    else { farmerProfiles=[]; renderFarmerProfiles(); onFarmerLookup(); }
     saveData();
     toast('All '+type+' records cleared.','inf');
   });
