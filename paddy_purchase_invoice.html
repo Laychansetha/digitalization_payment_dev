@@ -54,6 +54,8 @@
     html, body {
       overflow-x: hidden;
       width: 100%;
+      margin: 0;
+      padding: 0;
     }
 
     html {
@@ -66,32 +68,31 @@
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
       line-height: 1.5;
       min-height: 100vh;
-      padding: 8px;
+      padding: 12px;
     }
 
-    @media(min-width:640px) {
+    @media(min-width:768px) {
       body {
-        padding: 16px;
+        padding: 18px;
       }
     }
 
     @media(min-width:1024px) {
       body {
-        padding: 20px;
+        padding: 24px;
       }
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 1280px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
       width: 100%;
-      overflow-x: hidden;
     }
 
-    @media(min-width:640px) {
+    @media(min-width:768px) {
       .container {
         gap: 18px;
       }
@@ -103,39 +104,32 @@
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 8px;
-      padding: 10px 12px;
+      gap: 12px;
+      padding: 14px 18px;
       background: linear-gradient(135deg, #1e293b, var(--panel));
       border: 1px solid var(--border);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
     }
 
-    @media(min-width:640px) {
+    @media(min-width:768px) {
       .app-header {
-        padding: 16px 22px;
-        gap: 12px;
+        padding: 16px 24px;
       }
     }
 
     .header-brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 14px;
       flex: 1;
       min-width: 0;
     }
 
-    @media(min-width:640px) {
-      .header-brand {
-        gap: 14px;
-      }
-    }
-
     .header-logo {
-      width: 34px;
-      height: 34px;
-      border-radius: 8px;
+      width: 44px;
+      height: 44px;
+      border-radius: 11px;
       flex-shrink: 0;
       background: linear-gradient(135deg, var(--primary), var(--accent));
       display: flex;
@@ -144,25 +138,13 @@
     }
 
     .header-logo svg {
-      width: 20px;
-      height: 20px;
+      width: 24px;
+      height: 24px;
       color: #0b0f19;
     }
 
-    @media(min-width:640px) {
-      .header-logo {
-        width: 46px;
-        height: 46px;
-        border-radius: 11px;
-      }
-      .header-logo svg {
-        width: 26px;
-        height: 26px;
-      }
-    }
-
     .header-title {
-      font-size: 0.9rem;
+      font-size: 1.1rem;
       font-weight: 800;
       letter-spacing: -0.02em;
       line-height: 1.2;
@@ -170,91 +152,66 @@
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
-    @media(min-width:640px) {
+    @media(min-width:768px) {
       .header-title {
-        font-size: 1.15rem;
-        white-space: normal;
+        font-size: 1.18rem;
       }
     }
 
     .header-sub {
-      font-size: 0.68rem;
+      font-size: 0.75rem;
       color: var(--muted);
-      margin-top: 1px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      margin-top: 2px;
     }
 
-    @media(min-width:640px) {
+    @media(min-width:768px) {
       .header-sub {
         font-size: 0.78rem;
-        margin-top: 2px;
-        white-space: normal;
       }
     }
 
     .header-badge {
-      font-size: 0.65rem;
+      font-size: 0.72rem;
       font-weight: 700;
       background: var(--success-bg);
       color: var(--accent);
       border: 1px solid rgba(52, 211, 153, 0.22);
-      padding: 3px 8px;
-      border-radius: 14px;
+      padding: 5px 12px;
+      border-radius: 20px;
       white-space: nowrap;
       align-self: center;
     }
 
-    @media(min-width:640px) {
-      .header-badge {
-        font-size: 0.73rem;
-        padding: 5px 12px;
-        border-radius: 20px;
-      }
-    }
-
     /* ─── TAB NAV ────────────────────────────────── */
     .tab-nav {
-      display: flex;
-      gap: 4px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 4px;
+      padding: 6px;
       width: 100%;
-      max-width: 100%;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-
-    .tab-nav::-webkit-scrollbar {
-      display: none;
     }
 
     @media(min-width:640px) {
       .tab-nav {
-        padding: 6px;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
       }
     }
 
     .tab-btn {
-      flex: 1 1 0px;
-      min-width: 0;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
       justify-content: center;
-      gap: 3px;
-      padding: 8px 4px;
+      gap: 8px;
+      padding: 12px 14px;
       border-radius: 8px;
-      font-size: 0.72rem;
+      font-size: 0.85rem;
       font-weight: 700;
       font-family: inherit;
       cursor: pointer;
@@ -265,12 +222,19 @@
       text-align: center;
       white-space: nowrap;
       user-select: none;
-      -webkit-tap-highlight-color: transparent;
+      width: 100%;
+    }
+
+    @media(min-width:768px) {
+      .tab-btn {
+        font-size: 0.88rem;
+        padding: 12px 16px;
+      }
     }
 
     .tab-btn svg {
-      width: 15px;
-      height: 15px;
+      width: 17px;
+      height: 17px;
       flex-shrink: 0;
     }
 
@@ -278,20 +242,6 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 100%;
-    }
-
-    @media(min-width:640px) {
-      .tab-btn {
-        flex-direction: row;
-        gap: 8px;
-        padding: 12px 16px;
-        font-size: 0.88rem;
-      }
-      .tab-btn svg {
-        width: 17px;
-        height: 17px;
-      }
     }
 
     .tab-btn.active {
@@ -308,10 +258,10 @@
     .tab-content {
       display: none;
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
     }
 
-    @media(min-width:640px) {
+    @media(min-width:768px) {
       .tab-content {
         gap: 18px;
       }
@@ -339,20 +289,19 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 14px 14px;
+      padding: 18px 20px;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.12);
-      max-width: 100%;
-      overflow: hidden;
+      width: 100%;
     }
 
-    @media(min-width:640px) {
+    @media(min-width:768px) {
       .card {
-        padding: 22px;
+        padding: 22px 24px;
       }
     }
 
     .card-title {
-      font-size: 0.88rem;
+      font-size: 0.95rem;
       font-weight: 700;
       color: #fff;
       display: flex;
@@ -985,26 +934,22 @@
     /* ─── TRANSPORT TABLE ────────────────────────── */
     .t-wrap {
       overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
       border-radius: 8px;
       border: 1px solid var(--border);
       width: 100%;
-      max-width: 100%;
-      position: relative;
     }
 
     .t-table {
       width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      min-width: 580px;
+      border-collapse: collapse;
+      min-width: 640px;
     }
 
     .t-table th {
-      background: #1a2440;
-      padding: 8px 10px;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 10px 12px;
       text-align: left;
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -1014,28 +959,13 @@
     }
 
     .t-table td {
-      padding: 6px 8px;
+      padding: 8px 10px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.04);
       vertical-align: middle;
-      background: var(--panel);
-    }
-
-    /* Sticky Freeze First Column */
-    .t-table th:first-child,
-    .t-table td:first-child {
-      position: sticky;
-      left: 0;
-      z-index: 3;
-      background: var(--panel2);
-      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
     }
 
     .t-table tr:hover td {
-      background: rgba(255, 255, 255, 0.03);
-    }
-
-    .t-table tr:hover td:first-child {
-      background: #1e2a4a;
+      background: rgba(255, 255, 255, 0.018);
     }
 
     .t-table input,
@@ -1170,17 +1100,6 @@
         font-size: 1.25rem;
         margin-top: 4px;
       }
-    }
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .stat-val {
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: var(--text);
-      margin-top: 4px;
     }
 
     .stat-val.green {
@@ -3458,7 +3377,7 @@
       if (!filt.length) {
         c.innerHTML = `<div class="empty">
       <svg width="46" height="46" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-      <p>${purchaseRecs.length === 0 ? 'No records yet. Fill the form above and click <strong>Save</strong>.' : 'No records match your search.'}</p>
+      <p>${purchaseRecs.length === 0 ? 'No paddy purchase records available. Save your first purchase record to get started.' : 'No records match your search query.'}</p>
     </div>`;
         return;
       }
@@ -3736,7 +3655,7 @@
       if (!transportRecs.length) {
         c.innerHTML = `<div class="empty">
       <svg width="46" height="46" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-      <p>No transport records saved yet.</p></div>`;
+      <p>No transport records available. Create your first transport record to get started.</p></div>`;
         return;
       }
       c.innerHTML = '<div class="records-grid">' + transportRecs.map(tRecCard).join('') + '</div>';
@@ -3987,27 +3906,9 @@
         const fp = localStorage.getItem('ibis_farmer_payments'); if (fp) farmerProfiles = JSON.parse(fp);
         const sp = localStorage.getItem('ibis_specs');
         if (sp) {
-          specsRecs = JSON.parse(sp);
+          specsRecs = JSON.parse(sp).filter(r => r.id !== 'specs_1001');
         } else {
-          specsRecs = [
-            {
-              id: "specs_1001",
-              date: new Date().toISOString(),
-              familyId: "TB034",
-              farmerName: "Sok San",
-              villageName: "Bra",
-              paddyType: "Phka Rumduol",
-              selectedGrade: "A1",
-              isOrganic: true,
-              measurements: { wholeGrain: 75, brokenRice: 25, purity: null, impurity: 1, foreignMatter: 4, moisture: 13.5 },
-              isValid: true,
-              basePrice: 1650,
-              organicBonus: 100,
-              finalPrice: 1750,
-              bestQualifyingGrade: "A1"
-            }
-          ];
-          saveData();
+          specsRecs = [];
         }
       } catch (e) { purchaseRecs = []; transportRecs = []; farmerProfiles = []; specsRecs = []; }
     }
@@ -4441,7 +4342,7 @@
       if (filtered.length === 0) {
         container.innerHTML = `<div class="empty">
       <svg width="46" height="46" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-      <p>${specsRecs.length === 0 ? 'No specs inspection records saved yet. Fill the form above and click <strong>Save</strong>.' : 'No specs match your search query.'}</p>
+      <p>${specsRecs.length === 0 ? 'No quality specs inspection records available. Create your first inspection record to get started.' : 'No specs match your search query.'}</p>
     </div>`;
         return;
       }
@@ -4714,7 +4615,7 @@
       if (!filt.length) {
         c.innerHTML = `<div class="empty">
       <svg width="46" height="46" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-      <p>${farmerProfiles.length === 0 ? 'No farmer payment profiles registered yet. Fill the form above and click <strong>Save</strong>.' : 'No profiles match your search filters.'}</p>
+      <p>${farmerProfiles.length === 0 ? 'No farmer payment profiles available. Register your first payment profile to get started.' : 'No profiles match your search filters.'}</p>
     </div>`;
         return;
       }
