@@ -1221,6 +1221,7 @@
         padding-right: 36px !important;
         padding-left: 10px !important;
       }
+
       #pay-filter-method {
         width: 100% !important;
         max-width: 100% !important;
@@ -1317,9 +1318,10 @@
       .section-lbl {
         color: #059669;
       }
+    }
 
-      /* ─── SPECS MODULE STYLES ────────────────────── */
-      .result-badge {
+    /* ─── SPECS MODULE STYLES ────────────────────── */
+    .result-badge {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -2539,7 +2541,8 @@
             <input type="text" id="pay-search" placeholder="Search by ID, name, bank, account..."
               oninput="renderFarmerProfiles()">
           </div>
-          <select id="pay-filter-method" onchange="renderFarmerProfiles()" style="min-width:210px; width:auto; flex:0 0 auto;">
+          <select id="pay-filter-method" onchange="renderFarmerProfiles()"
+            style="min-width:210px; width:auto; flex:0 0 auto;">
             <option value="">All Payment Methods</option>
             <option value="Bank Transfer">Bank Transfer</option>
             <option value="Cash">Cash</option>
@@ -4536,8 +4539,8 @@
 
     function confirmClear(type) {
       const title = type === 'purchase' ? 'Clear All Purchase Records' :
-                    (type === 'transport' ? 'Clear All Transport Records' :
-                    (type === 'payment' ? 'Clear All Farmer Payment Profiles' : 'Clear All Specs Records'));
+        (type === 'transport' ? 'Clear All Transport Records' :
+          (type === 'payment' ? 'Clear All Farmer Payment Profiles' : 'Clear All Specs Records'));
       openConfirm(title, 'This will permanently delete ALL records of this type. This cannot be undone.', () => {
         if (type === 'purchase') {
           purchaseRecs = [];
