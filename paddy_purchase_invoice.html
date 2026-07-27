@@ -437,10 +437,41 @@
       #content-transport{display:none!important;}
       .card-title svg{color:#10b981;}
       .section-lbl{color:#059669;}
-      .overlay.open{position:absolute;inset:0;background:#fff;color:#111;padding:0;opacity:1;pointer-events:all;z-index:9999;}
-      .overlay.open .modal{background:#fff;color:#111;border:1px solid #ccc;max-width:100%!important;max-height:none!important;box-shadow:none;transform:none;padding:16px;}
-      .overlay.open .modal-foot{display:none!important;}
+    /* ─── SPECS MODULE STYLES ────────────────────── */
+    .result-badge {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 14px; border-radius: 8px; font-size: 1.05rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.04em; text-align: center;
     }
+    .badge-pass { background-color: var(--success-bg); color: var(--primary); border: 1px solid rgba(16, 185, 129, 0.25); }
+    .badge-fail { background-color: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.25); }
+    .switch-container {
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border);
+      padding: 10px 14px; border-radius: 8px; cursor: pointer; user-select: none;
+    }
+    .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; inset: 0; background-color: var(--input-bdr);
+      transition: .3s; border-radius: 34px;
+    }
+    .slider:before {
+      position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px;
+      background-color: white; transition: .3s; border-radius: 50%;
+    }
+    input:checked + .slider { background-color: var(--primary); }
+    input:checked + .slider:before { transform: translateX(20px); }
+
+    .status-alert { padding: 12px 14px; border-radius: 8px; font-size: 0.84rem; margin-top: 12px; }
+    .status-alert-danger { background-color: var(--danger-bg); border: 1px solid rgba(239, 68, 68, 0.25); color: #fca5a5; }
+    .status-alert-info { background-color: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.25); color: #93c5fd; }
+    .alert-title { font-weight: 700; display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .alert-list { margin-left: 18px; line-height: 1.4; font-size: 0.8rem; }
+    .badge-status { padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; }
+    .badge-status.pass { background: var(--success-bg); color: var(--primary); border: 1px solid rgba(16,185,129,0.3); }
+    .badge-status.fail { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
@@ -460,7 +491,7 @@
       </div>
       <div>
         <div class="header-title">IBIS RICE CONSERVATION CO., LTD</div>
-        <div class="header-sub">Paddy Purchase Invoice · Digital Field Tool · v1.0</div>
+        <div class="header-sub">Integrated Paddy Operations · Specs, Payment, Purchase &amp; Transport · v1.0</div>
       </div>
     </div>
     <span class="header-badge">⚡ Offline Ready</span>
@@ -470,30 +501,221 @@
        TAB NAVIGATION
   ══════════════════════════════════════════════════ -->
   <nav class="tab-nav" role="tablist">
-    <button class="tab-btn active" onclick="switchTab('purchase')" id="tab-purchase">
+    <button class="tab-btn active" onclick="switchTab('specs')" id="tab-specs">
       <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
       </svg>
-      🌾 Purchase Record
-    </button>
-    <button class="tab-btn" onclick="switchTab('transport')" id="tab-transport">
-      <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
-      </svg>
-      🚛 Transport Record
+      🔬 1. Specs Record
     </button>
     <button class="tab-btn" onclick="switchTab('payment')" id="tab-payment">
       <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
       </svg>
-      💳 Farmer Payment Info
+      💳 2. Farmer Payment Info
+    </button>
+    <button class="tab-btn" onclick="switchTab('purchase')" id="tab-purchase">
+      <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+      </svg>
+      🌾 3. Purchase Record
+    </button>
+    <button class="tab-btn" onclick="switchTab('transport')" id="tab-transport">
+      <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+      </svg>
+      🚛 4. Transport Record
     </button>
   </nav>
 
   <!-- ═══════════════════════════════════════════════
-       PURCHASE RECORD TAB
+       1. SPECS RECORD TAB
   ══════════════════════════════════════════════════ -->
-  <div class="tab-content active" id="content-purchase">
+  <div class="tab-content active" id="content-specs">
+
+    <!-- Stats Summary -->
+    <div class="card">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-lbl">Total Inspections</div>
+          <div class="stat-val green" id="sp-st-total">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-lbl">Pass Rate</div>
+          <div class="stat-val green" id="sp-st-rate">0%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-lbl">Avg. Price (Valid)</div>
+          <div class="stat-val gold" id="sp-st-avg">0 KHR</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-lbl">Organic Bonus Rate</div>
+          <div class="stat-val">+100 KHR</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Specs Entry Dashboard -->
+    <div class="card">
+      <div class="card-title">
+        <svg width="19" height="19" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        Paddy Quality Inspection Entry
+      </div>
+      <input type="hidden" id="sp-editing-id" value="">
+
+      <!-- Farmer Info -->
+      <div class="fg fg-3" style="margin-bottom:14px;">
+        <div class="fgroup">
+          <label for="sp-code">Family Code / Farmer ID <span style="color:var(--danger)">*</span></label>
+          <input type="text" id="sp-code" placeholder="e.g. TB034">
+        </div>
+        <div class="fgroup">
+          <label for="sp-name">Producer Name <span style="color:var(--danger)">*</span></label>
+          <input type="text" id="sp-name" placeholder="e.g. Sok San">
+        </div>
+        <div class="fgroup">
+          <label for="sp-village">Village</label>
+          <select id="sp-village">
+            <option value="">— Select Village —</option>
+            <option>Bra</option><option>Damnak Kantout</option><option>Dan</option>
+            <option>Dang Phlet</option><option>Kampenh</option><option>Kampong Sangkae</option>
+            <option>Kham Keut</option><option>Kong Yoang</option><option>Krala Peas</option>
+            <option>Narong</option><option>Okak</option><option>Pongro</option>
+            <option>Prey Veng</option><option>Sambou</option><option>Soung</option>
+            <option>Tmat Paeuy</option><option>Yeang</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Category & Grade -->
+      <div class="fg fg-3" style="margin-bottom:14px;">
+        <div class="fgroup">
+          <label for="sp-type">Paddy Category <span style="color:var(--danger)">*</span></label>
+          <select id="sp-type" onchange="handleSpecsPaddyTypeChange()">
+            <option value="Phka Rumduol">Phka Rumduol</option>
+            <option value="Red Jasmine">Red Jasmine</option>
+            <option value="Foundation Seed – Red Jasmine">Foundation Seed – Red Jasmine</option>
+            <option value="Foundation Seed – Rumduol">Foundation Seed – Rumduol</option>
+            <option value="Certified Seed">Certified Seed</option>
+            <option value="White Rice">White Rice</option>
+          </select>
+        </div>
+        <div class="fgroup">
+          <label for="sp-grade">Selected Grade <span style="color:var(--danger)">*</span></label>
+          <select id="sp-grade" onchange="runSpecsLiveCalculation()"></select>
+        </div>
+        <div class="fgroup" style="justify-content:flex-end;">
+          <div class="switch-container" onclick="toggleSpecsOrganicSwitch()">
+            <div class="switch-label">
+              <span style="font-weight:700; font-size:0.85rem;">Organic Paddy (+100 KHR)</span>
+              <span class="switch-desc">Applies Organic Premium Bonus</span>
+            </div>
+            <label class="switch" onclick="event.stopPropagation()">
+              <input type="checkbox" id="sp-isOrganic" checked onchange="runSpecsLiveCalculation()">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quality Measurements -->
+      <div style="font-size:0.8rem; font-weight:800; color:var(--accent); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:10px;">Quality Inspection Measurements</div>
+      
+      <div class="fg fg-3" style="margin-bottom:14px;">
+        <div class="fgroup" id="sp-grp-moisture">
+          <label for="sp-moisture">Moisture Level (%)</label>
+          <select id="sp-moisture" onchange="runSpecsLiveCalculation()"></select>
+        </div>
+        <div class="fgroup" id="sp-grp-foreign">
+          <label for="sp-foreign">Foreign / Undeveloped (%)</label>
+          <select id="sp-foreign" onchange="runSpecsLiveCalculation()"></select>
+        </div>
+        <div class="fgroup" id="sp-grp-purity">
+          <label for="sp-purity">Seed Purity (%)</label>
+          <select id="sp-purity" onchange="runSpecsLiveCalculation()"></select>
+        </div>
+      </div>
+
+      <div class="fg fg-3" style="margin-bottom:14px;">
+        <div class="fgroup" id="sp-grp-impurity">
+          <label for="sp-impurity">Inert Impurity (%)</label>
+          <select id="sp-impurity" onchange="runSpecsLiveCalculation()"></select>
+        </div>
+        <div class="fgroup" id="sp-grp-whole">
+          <label for="sp-whole">Whole Grain (%)</label>
+          <select id="sp-whole" onchange="runSpecsLiveCalculation()"></select>
+        </div>
+        <div class="fgroup" id="sp-grp-broken">
+          <label for="sp-broken">Broken Rice (%)</label>
+          <select id="sp-broken" onchange="runSpecsLiveCalculation()"></select>
+        </div>
+      </div>
+
+      <!-- Live Result & Calculation Panel -->
+      <div style="margin-top:10px; padding:16px; background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:10px;">
+        <div id="sp-liveResultBadge" class="result-badge badge-pass">
+          <span>Evaluating Specs...</span>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:14px; text-align:center;">
+          <div style="padding:10px; background:var(--input-bg); border-radius:8px; border:1px solid var(--border);">
+            <div style="font-size:0.68rem; font-weight:700; color:var(--muted); text-transform:uppercase;">Base Grade Price</div>
+            <div id="sp-liveBasePrice" style="font-size:1.05rem; font-weight:800; color:var(--text); margin-top:2px;">0 KHR/kg</div>
+          </div>
+          <div style="padding:10px; background:var(--input-bg); border-radius:8px; border:1px solid var(--border);">
+            <div style="font-size:0.68rem; font-weight:700; color:var(--muted); text-transform:uppercase;">Organic Bonus</div>
+            <div id="sp-liveOrganicBonus" style="font-size:1.05rem; font-weight:800; color:var(--accent); margin-top:2px;">+100 KHR/kg</div>
+          </div>
+          <div style="padding:10px; background:var(--input-bg); border-radius:8px; border:1px solid var(--primary);">
+            <div style="font-size:0.68rem; font-weight:700; color:var(--primary); text-transform:uppercase;">Final Purchase Price</div>
+            <div id="sp-liveFinalPrice" style="font-size:1.15rem; font-weight:800; color:var(--gold); margin-top:2px;">0 KHR/kg</div>
+          </div>
+        </div>
+
+        <div id="sp-liveAlertsContainer"></div>
+      </div>
+
+      <!-- Actions Bar -->
+      <div class="actions-bar" style="justify-content:flex-end; margin-top:16px;">
+        <button type="button" class="btn btn-secondary" onclick="resetSpecsForm()">Reset Form</button>
+        <button type="button" class="btn btn-primary" onclick="saveSpecsRecord()" id="sp-submitBtn">
+          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+          Save Specs Record
+        </button>
+      </div>
+    </div>
+
+    <!-- Specs Records History -->
+    <div class="card" style="margin-top:20px;">
+      <div class="hist-header">
+        <div class="card-title" style="margin:0;padding:0;border:none;">
+          <svg width="19" height="19" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          Saved Quality Specs Inspection History
+        </div>
+        <div class="actions-bar" style="gap:8px;">
+          <button class="btn btn-secondary btn-sm" onclick="exportSpecsCSV()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Export CSV
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="confirmClear('specs')">Clear All</button>
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <div class="search-wrap">
+          <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" id="sp-search" placeholder="Search by Farmer ID, name, variety, grade, village..." oninput="renderSpecsHistory()">
+        </div>
+      </div>
+
+      <div id="sp-history"></div>
+    </div>
+
+  </div><!-- /specs tab -->
+
+  <!-- ═══════════════════════════════════════════════
+       3. PURCHASE RECORD TAB
+  ══════════════════════════════════════════════════ -->
+  <div class="tab-content" id="content-purchase">
 
     <!-- Farmer Info -->
     <div class="card">
@@ -540,6 +762,20 @@
           </div>
         </div>
         <button type="button" class="btn btn-secondary btn-xs" onclick="quickManagePayment()" id="p-payment-link-btn" style="font-size:0.75rem;">💳 Manage Payment Info</button>
+      </div>
+
+      <!-- Linked Quality Specs Badge -->
+      <div id="p-specs-link-card" style="margin-top:10px; padding:12px 14px; background:rgba(16,185,129,0.05); border:1px solid rgba(16,185,129,0.22); border-radius:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:34px; height:34px; border-radius:8px; background:rgba(16,185,129,0.12); display:flex; align-items:center; justify-content:center; color:#10b981; flex-shrink:0;">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          </div>
+          <div>
+            <div style="font-size:0.72rem; font-weight:800; color:#10b981; text-transform:uppercase; letter-spacing:0.04em;">Quality Specification Record</div>
+            <div id="p-specs-link-info" style="font-size:0.84rem; color:var(--text); font-weight:600; margin-top:2px;">Enter Family Code to automatically link quality inspection specs.</div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-primary btn-xs" onclick="applyLinkedSpecs()" id="p-specs-link-btn" style="font-size:0.75rem; display:none;">⚡ Apply Specs &amp; Price</button>
       </div>
     </div>
 
@@ -1162,7 +1398,7 @@
      JAVASCRIPT
 ════════════════════════════════════════════════ -->
 <script>
-/* ── PADDY SPECS DATABASE ────────────────────────── */
+/* ── PADDY SPECS DATABASE & RULES ────────────────── */
 const SPECS = {
   "Phka Rumduol":               { grades:["A1","A2","B1","B2"], prices:{"A1":1650,"A2":1550,"B1":1500,"B2":1450} },
   "Red Jasmine":                { grades:["A1","A2","B1","B2"], prices:{"A1":1897.5,"A2":1797.5,"B1":1747.5,"B2":1697.5} },
@@ -1174,6 +1410,71 @@ const SPECS = {
   "Seed Return":                { grades:["N/A"], prices:{"N/A":0} },
   "Other":                      { grades:["N/A"], prices:{"N/A":0} }
 };
+
+const PADDY_SPECS = {
+  "Phka Rumduol": {
+    grades: ["A1", "A2", "B1", "B2"],
+    hasPurity: false,
+    hasWholeBroken: true,
+    hasImpurity: true,
+    rules: {
+      "A1": { price: 1650, minWhole: 75, maxBroken: 25, maxImpurity: 2, maxForeign: 6, minMoisture: 13, maxMoisture: 14 },
+      "A2": { price: 1550, minWhole: 70, maxBroken: 30, maxImpurity: 4, maxForeign: 6, minMoisture: 13, maxMoisture: 15 },
+      "B1": { price: 1500, minWhole: 60, maxBroken: 40, maxImpurity: 2, maxForeign: 6, minMoisture: 13, maxMoisture: 15 },
+      "B2": { price: 1450, minWhole: 50, maxBroken: 50, maxImpurity: 4, maxForeign: 6, minMoisture: 13, maxMoisture: 15 }
+    }
+  },
+  "Red Jasmine": {
+    grades: ["A1", "A2", "B1", "B2"],
+    hasPurity: false,
+    hasWholeBroken: true,
+    hasImpurity: false,
+    rules: {
+      "A1": { price: 1897.5, minWhole: 75, maxBroken: 25, maxImpurity: null, maxForeign: 6, minMoisture: 13, maxMoisture: 14 },
+      "A2": { price: 1797.5, minWhole: 70, maxBroken: 30, maxImpurity: null, maxForeign: 6, minMoisture: 13, maxMoisture: 15 },
+      "B1": { price: 1747.5, minWhole: 60, maxBroken: 40, maxImpurity: null, maxForeign: 6, minMoisture: 13, maxMoisture: 15 },
+      "B2": { price: 1697.5, minWhole: 50, maxBroken: 50, maxImpurity: null, maxForeign: 6, minMoisture: 13, maxMoisture: 15 }
+    }
+  },
+  "Foundation Seed – Red Jasmine": {
+    grades: ["A"],
+    hasPurity: true,
+    hasWholeBroken: false,
+    hasImpurity: true,
+    rules: {
+      "A": { price: 2145, minPurity: 98, maxImpurity: 1, maxForeign: 1, minMoisture: 11, maxMoisture: 13 }
+    }
+  },
+  "Foundation Seed – Rumduol": {
+    grades: ["A"],
+    hasPurity: true,
+    hasWholeBroken: false,
+    hasImpurity: true,
+    rules: {
+      "A": { price: 2045, minPurity: 98, maxImpurity: 1, maxForeign: 1, minMoisture: 11, maxMoisture: 13 }
+    }
+  },
+  "Certified Seed": {
+    grades: ["Standard"],
+    hasPurity: true,
+    hasWholeBroken: false,
+    hasImpurity: true,
+    rules: {
+      "Standard": { price: 1900, minPurity: 96, maxImpurity: 2, maxForeign: 2, minMoisture: 11, maxMoisture: 13 }
+    }
+  },
+  "White Rice": {
+    grades: ["A", "B"],
+    hasPurity: false,
+    hasWholeBroken: false,
+    hasImpurity: false,
+    rules: {
+      "A": { price: 1320, maxForeign: 4, minMoisture: 13, maxMoisture: 14 },
+      "B": { price: 1220, maxForeign: 8, minMoisture: 13, maxMoisture: 14 }
+    }
+  }
+};
+
 const ORGANIC_BONUS = 100;
 const VILLAGES = ["Bra","Damnak Kantout","Dan","Dang Phlet","Kampenh","Kampong Sangkae","Kham Keut","Kong Yoang","Krala Peas","Narong","Okak","Pongro","Prey Veng","Sambou","Soung","Tmat Paeuy","Yeang"];
 
@@ -1181,6 +1482,7 @@ const VILLAGES = ["Bra","Damnak Kantout","Dan","Dang Phlet","Kampenh","Kampong S
 let purchaseRecs = [];
 let transportRecs = [];
 let farmerProfiles = [];
+let specsRecs = [];
 let tRows = [];
 let sigPads = {};
 let confirmCb = null;
@@ -1200,11 +1502,14 @@ window.addEventListener('DOMContentLoaded', () => {
     const el = document.getElementById(id); if(el) el.value = timeStr;
   });
   loadData();
+  populateSpecsDropdowns();
+  handleSpecsPaddyTypeChange();
   initSigs();
   renderTRows();
+  renderSpecsHistory();
+  renderFarmerProfiles();
   renderPH();
   renderTH();
-  renderFarmerProfiles();
   onFarmerLookup();
   updateSackTotals(1);
 });
@@ -2105,47 +2410,577 @@ function saveData(){
     localStorage.setItem('ibis_purch', JSON.stringify(purchaseRecs.map(r=>({...r, signatures:Object.fromEntries(Object.entries(r.signatures||{}).map(([k,v])=>[k,{name:v.name,date:v.date,hasDrawing:v.hasDrawing}]))})) ));
     localStorage.setItem('ibis_trans', JSON.stringify(transportRecs));
     localStorage.setItem('ibis_farmer_payments', JSON.stringify(farmerProfiles));
+    localStorage.setItem('ibis_specs', JSON.stringify(specsRecs));
   } catch(e){ toast('Storage limit reached.','err'); }
 }
+
 function loadData(){
   try {
     const p=localStorage.getItem('ibis_purch'); if(p) purchaseRecs=JSON.parse(p);
     const t=localStorage.getItem('ibis_trans');  if(t) transportRecs=JSON.parse(t);
-    const fp=localStorage.getItem('ibis_farmer_payments');
-    if(fp) {
-      farmerProfiles=JSON.parse(fp);
+    const fp=localStorage.getItem('ibis_farmer_payments'); if(fp) farmerProfiles=JSON.parse(fp);
+    const sp=localStorage.getItem('ibis_specs');
+    if(sp) {
+      specsRecs=JSON.parse(sp);
     } else {
-      farmerProfiles = [
+      specsRecs = [
         {
-          farmerId: "TB034",
-          producerName: "Sok San",
-          village: "Bra",
-          paymentMethod: "Bank Transfer",
-          bankName: "ABA Bank",
-          accountNumber: "000 123 456",
-          accountHolderName: "Sok Channa",
-          relationship: "Wife",
-          phoneNumber: "012 345 678",
-          notes: "Ferry crossing area",
-          updatedAt: new Date().toISOString()
-        },
-        {
-          farmerId: "TB012",
-          producerName: "Chan Dara",
-          village: "Dang Phlet",
-          paymentMethod: "Bank Transfer",
-          bankName: "ACLEDA Bank",
-          accountNumber: "5544 3322 1100",
-          accountHolderName: "Chan Dara",
-          relationship: "Self",
-          phoneNumber: "097 888 999",
-          notes: "Direct farmer bank account",
-          updatedAt: new Date().toISOString()
+          id: "specs_1001",
+          date: new Date().toISOString(),
+          familyId: "TB034",
+          farmerName: "Sok San",
+          villageName: "Bra",
+          paddyType: "Phka Rumduol",
+          selectedGrade: "A1",
+          isOrganic: true,
+          measurements: { wholeGrain:75, brokenRice:25, purity:null, impurity:1, foreignMatter:4, moisture:13.5 },
+          isValid: true,
+          basePrice: 1650,
+          organicBonus: 100,
+          finalPrice: 1750,
+          bestQualifyingGrade: "A1"
         }
       ];
       saveData();
     }
-  } catch(e){ purchaseRecs=[]; transportRecs=[]; farmerProfiles=[]; }
+  } catch(e){ purchaseRecs=[]; transportRecs=[]; farmerProfiles=[]; specsRecs=[]; }
+}
+
+/* ── SPECS MODULE LOGIC ───────────────────────────── */
+function populateSpecsDropdowns() {
+  const wholeSel = document.getElementById('sp-whole');
+  const brokenSel = document.getElementById('sp-broken');
+  const puritySel = document.getElementById('sp-purity');
+  const impuritySel = document.getElementById('sp-impurity');
+  const foreignSel = document.getElementById('sp-foreign');
+  const moistureSel = document.getElementById('sp-moisture');
+
+  if (!wholeSel || !brokenSel || !puritySel || !impuritySel || !foreignSel || !moistureSel) return;
+
+  wholeSel.innerHTML = '';
+  brokenSel.innerHTML = '';
+  puritySel.innerHTML = '';
+  impuritySel.innerHTML = '';
+  foreignSel.innerHTML = '';
+  moistureSel.innerHTML = '';
+
+  const wholeValues = [100, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 30, 20, 10, 0];
+  wholeValues.forEach(v => wholeSel.add(createOption(v, `${v}%`)));
+  wholeSel.value = 75;
+
+  const brokenValues = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 70, 80, 90, 100];
+  brokenValues.forEach(v => brokenSel.add(createOption(v, `${v}%`)));
+  brokenSel.value = 25;
+
+  const purityValues = [100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90, 85, 80];
+  purityValues.forEach(v => puritySel.add(createOption(v, `${v}%`)));
+  puritySel.value = 98;
+
+  const impurityValues = [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 6, 7, 8, 9, 10];
+  impurityValues.forEach(v => impuritySel.add(createOption(v, `${v}%`)));
+  impuritySel.value = 1;
+
+  const foreignValues = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+  foreignValues.forEach(v => foreignSel.add(createOption(v, `${v}%`)));
+  foreignSel.value = 4;
+
+  const moistureValues = [9, 9.5, 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 16, 17, 18];
+  moistureValues.forEach(v => moistureSel.add(createOption(v, `${v}%`)));
+  moistureSel.value = 13.5;
+}
+
+function createOption(value, text) {
+  const opt = document.createElement("option");
+  opt.value = value;
+  opt.text = text;
+  return opt;
+}
+
+function handleSpecsPaddyTypeChange() {
+  const typeEl = document.getElementById('sp-type');
+  const gradeSelect = document.getElementById('sp-grade');
+  if (!typeEl || !gradeSelect) return;
+
+  const type = typeEl.value;
+  const config = PADDY_SPECS[type];
+  if (!config) return;
+
+  gradeSelect.innerHTML = '';
+  config.grades.forEach(grade => {
+    const opt = document.createElement("option");
+    opt.value = grade;
+    opt.text = grade;
+    gradeSelect.add(opt);
+  });
+
+  toggleField('sp-grp-whole', config.hasWholeBroken);
+  toggleField('sp-grp-broken', config.hasWholeBroken);
+  toggleField('sp-grp-purity', config.hasPurity);
+  toggleField('sp-grp-impurity', config.hasImpurity);
+
+  runSpecsLiveCalculation();
+}
+
+function toggleField(elementId, isVisible) {
+  const el = document.getElementById(elementId);
+  if (el) {
+    if (isVisible) el.classList.remove('hidden');
+    else el.classList.add('hidden');
+  }
+}
+
+function toggleSpecsOrganicSwitch() {
+  const checkbox = document.getElementById('sp-isOrganic');
+  if (checkbox) {
+    checkbox.checked = !checkbox.checked;
+    runSpecsLiveCalculation();
+  }
+}
+
+function getSpecsInspectionInputs() {
+  const type = document.getElementById('sp-type').value;
+  const grade = document.getElementById('sp-grade').value;
+  const isOrganic = document.getElementById('sp-isOrganic').checked;
+  const config = PADDY_SPECS[type];
+
+  return {
+    type,
+    grade,
+    isOrganic,
+    measurements: {
+      wholeGrain: config && config.hasWholeBroken ? parseFloat(document.getElementById('sp-whole').value) : null,
+      brokenRice: config && config.hasWholeBroken ? parseFloat(document.getElementById('sp-broken').value) : null,
+      purity: config && config.hasPurity ? parseFloat(document.getElementById('sp-purity').value) : null,
+      impurity: config && config.hasImpurity ? parseFloat(document.getElementById('sp-impurity').value) : null,
+      foreignMatter: parseFloat(document.getElementById('sp-foreign').value),
+      moisture: parseFloat(document.getElementById('sp-moisture').value)
+    }
+  };
+}
+
+function validateSpecsSample(type, grade, measurements) {
+  const config = PADDY_SPECS[type];
+  if (!config) return { valid: false, errors: ["Invalid paddy type"] };
+  const rules = config.rules[grade];
+  if (!rules) return { valid: false, errors: ["Invalid grade"] };
+
+  const errors = [];
+  const status = {};
+
+  if (config.hasWholeBroken) {
+    const whole = measurements.wholeGrain;
+    if (whole !== null && whole !== undefined) {
+      if (whole < rules.minWhole) {
+        errors.push(`Whole Grain too low (Actual: ${whole}%, Req: >= ${rules.minWhole}%)`);
+        status.wholeGrain = false;
+      } else status.wholeGrain = true;
+    }
+    const broken = measurements.brokenRice;
+    if (broken !== null && broken !== undefined) {
+      if (broken > rules.maxBroken) {
+        errors.push(`Broken Rice too high (Actual: ${broken}%, Req: <= ${rules.maxBroken}%)`);
+        status.brokenRice = false;
+      } else status.brokenRice = true;
+    }
+  }
+
+  if (config.hasPurity) {
+    const purity = measurements.purity;
+    if (purity !== null && purity !== undefined) {
+      if (purity < rules.minPurity) {
+        errors.push(`Seed Purity too low (Actual: ${purity}%, Req: >= ${rules.minPurity}%)`);
+        status.purity = false;
+      } else status.purity = true;
+    }
+  }
+
+  if (config.hasImpurity && rules.maxImpurity !== null) {
+    const impurity = measurements.impurity;
+    if (impurity !== null && impurity !== undefined) {
+      if (impurity > rules.maxImpurity) {
+        errors.push(`Impurity too high (Actual: ${impurity}%, Req: <= ${rules.maxImpurity}%)`);
+        status.impurity = false;
+      } else status.impurity = true;
+    }
+  }
+
+  const foreign = measurements.foreignMatter;
+  if (foreign !== null && foreign !== undefined) {
+    if (foreign > rules.maxForeign) {
+      errors.push(`Foreign Matter too high (Actual: ${foreign}%, Req: <= ${rules.maxForeign}%)`);
+      status.foreignMatter = false;
+    } else status.foreignMatter = true;
+  }
+
+  const moisture = measurements.moisture;
+  if (moisture !== null && moisture !== undefined) {
+    if (moisture < rules.minMoisture || moisture > rules.maxMoisture) {
+      errors.push(`Moisture out of range (Actual: ${moisture}%, Req: ${rules.minMoisture}% - ${rules.maxMoisture}%)`);
+      status.moisture = false;
+    } else status.moisture = true;
+  }
+
+  return { valid: errors.length === 0, errors, status, rules };
+}
+
+function findBestSpecsGrade(type, measurements) {
+  const config = PADDY_SPECS[type];
+  if (!config) return null;
+
+  let bestGrade = null;
+  let highestPrice = -1;
+
+  config.grades.forEach(grade => {
+    const res = validateSpecsSample(type, grade, measurements);
+    if (res.valid) {
+      const p = config.rules[grade].price;
+      if (p > highestPrice) {
+        highestPrice = p;
+        bestGrade = grade;
+      }
+    }
+  });
+
+  return bestGrade;
+}
+
+function runSpecsLiveCalculation() {
+  const inputs = getSpecsInspectionInputs();
+  const validation = validateSpecsSample(inputs.type, inputs.grade, inputs.measurements);
+  const config = PADDY_SPECS[inputs.type];
+
+  const resultBadge = document.getElementById('sp-liveResultBadge');
+  const basePriceEl = document.getElementById('sp-liveBasePrice');
+  const organicBonusEl = document.getElementById('sp-liveOrganicBonus');
+  const finalPriceEl = document.getElementById('sp-liveFinalPrice');
+  const alertsContainer = document.getElementById('sp-liveAlertsContainer');
+
+  if (!resultBadge || !basePriceEl) return;
+
+  const bonus = inputs.isOrganic ? 100 : 0;
+  organicBonusEl.textContent = `+${bonus} KHR/kg`;
+
+  if (validation.valid) {
+    const basePrice = validation.rules.price;
+    const finalPrice = basePrice + bonus;
+
+    resultBadge.className = "result-badge badge-pass";
+    resultBadge.innerHTML = `
+      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+      <span>Meets Grade ${esc(inputs.grade)} (Pass)</span>
+    `;
+
+    basePriceEl.textContent = `${basePrice.toLocaleString()} KHR/kg`;
+    finalPriceEl.textContent = `${finalPrice.toLocaleString()} KHR/kg`;
+    alertsContainer.innerHTML = '';
+  } else {
+    resultBadge.className = "result-badge badge-fail";
+    resultBadge.innerHTML = `
+      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M6 18L18 6M6 6l12 12"/></svg>
+      <span>Does Not Meet Grade ${esc(inputs.grade)}</span>
+    `;
+
+    basePriceEl.textContent = `0 KHR/kg`;
+    finalPriceEl.textContent = `0 KHR/kg`;
+
+    const recommendedGrade = findBestSpecsGrade(inputs.type, inputs.measurements);
+    let recommendationHtml = '';
+    if (recommendedGrade) {
+      const recPrice = config.rules[recommendedGrade].price;
+      const recFinal = recPrice + bonus;
+      recommendationHtml = `
+        <div class="status-alert status-alert-info">
+          <div class="alert-title">💡 Recommended Grade Option</div>
+          <p>Meets specifications for <strong>Grade ${esc(recommendedGrade)}</strong> (Base: ${recPrice.toLocaleString()} KHR/kg, Final: ${recFinal.toLocaleString()} KHR/kg).</p>
+        </div>
+      `;
+    } else {
+      recommendationHtml = `
+        <div class="status-alert status-alert-info" style="background-color: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.2); color: #fcd34d;">
+          <div class="alert-title">⚠️ Rejected / Underweight</div>
+          <p>This inspection sample does not meet requirements for any grade in this category.</p>
+        </div>
+      `;
+    }
+
+    alertsContainer.innerHTML = `
+      <div class="status-alert status-alert-danger">
+        <div class="alert-title">❌ Failing Quality Specifications:</div>
+        <ul class="alert-list">
+          ${validation.errors.map(err => `<li>${esc(err)}</li>`).join('')}
+        </ul>
+      </div>
+      ${recommendationHtml}
+    `;
+  }
+}
+
+function saveSpecsRecord() {
+  const code = document.getElementById('sp-code').value.trim();
+  const name = document.getElementById('sp-name').value.trim();
+  const village = document.getElementById('sp-village').value;
+  const editId = document.getElementById('sp-editing-id').value;
+
+  if (!code || !name) {
+    toast('Please fill in Family Code / Farmer ID and Producer Name.', 'err');
+    return;
+  }
+
+  const inputs = getSpecsInspectionInputs();
+  const validation = validateSpecsSample(inputs.type, inputs.grade, inputs.measurements);
+  const isValid = validation.valid;
+  const basePrice = isValid ? validation.rules.price : 0;
+  const bonusPrice = inputs.isOrganic ? 100 : 0;
+  const finalPrice = basePrice + bonusPrice;
+  const bestGrade = findBestSpecsGrade(inputs.type, inputs.measurements);
+
+  const normCode = code.toUpperCase();
+  const recordData = {
+    id: editId || 'specs_' + Date.now(),
+    date: editId ? (specsRecs.find(r => r.id === editId)?.date || new Date().toISOString()) : new Date().toISOString(),
+    familyId: normCode,
+    farmerName: name,
+    villageName: village || '',
+    paddyType: inputs.type,
+    selectedGrade: inputs.grade,
+    isOrganic: inputs.isOrganic,
+    measurements: inputs.measurements,
+    isValid,
+    basePrice,
+    organicBonus: bonusPrice,
+    finalPrice,
+    bestQualifyingGrade: bestGrade || 'None'
+  };
+
+  if (editId) {
+    const idx = specsRecs.findIndex(r => r.id === editId);
+    if (idx !== -1) specsRecs[idx] = recordData;
+  } else {
+    specsRecs.unshift(recordData);
+  }
+
+  saveData();
+  resetSpecsForm();
+  renderSpecsHistory();
+  onFarmerLookup();
+  toast('✅ Quality Specs Record saved!', 'ok');
+}
+
+function editSpecsRecord(id) {
+  const rec = specsRecs.find(r => r.id === id);
+  if (!rec) return;
+
+  document.getElementById('sp-editing-id').value = rec.id;
+  document.getElementById('sp-code').value = rec.familyId;
+  document.getElementById('sp-name').value = rec.farmerName;
+  document.getElementById('sp-village').value = rec.villageName || '';
+  document.getElementById('sp-isOrganic').checked = rec.isOrganic;
+  document.getElementById('sp-type').value = rec.paddyType;
+
+  handleSpecsPaddyTypeChange();
+  document.getElementById('sp-grade').value = rec.selectedGrade;
+
+  const m = rec.measurements;
+  if (m.wholeGrain !== null) setSelectValueSafely('sp-whole', m.wholeGrain, true);
+  if (m.brokenRice !== null) setSelectValueSafely('sp-broken', m.brokenRice, true);
+  if (m.purity !== null) setSelectValueSafely('sp-purity', m.purity, true);
+  if (m.impurity !== null) setSelectValueSafely('sp-impurity', m.impurity, true);
+  if (m.foreignMatter !== null) setSelectValueSafely('sp-foreign', m.foreignMatter, true);
+  if (m.moisture !== null) setSelectValueSafely('sp-moisture', m.moisture, true);
+
+  document.getElementById('sp-submitBtn').textContent = "Update Specs Record";
+  switchTab('specs');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  runSpecsLiveCalculation();
+  toast('Loaded specs for ' + rec.farmerName, 'inf');
+}
+
+function deleteSpecsRecord(id) {
+  specsRecs = specsRecs.filter(r => r.id !== id);
+  saveData();
+  renderSpecsHistory();
+  onFarmerLookup();
+  toast('Specs record deleted.', 'inf');
+}
+
+function resetSpecsForm() {
+  document.getElementById('sp-editing-id').value = '';
+  document.getElementById('sp-code').value = '';
+  document.getElementById('sp-name').value = '';
+  document.getElementById('sp-village').value = '';
+  document.getElementById('sp-isOrganic').checked = true;
+  document.getElementById('sp-type').selectedIndex = 0;
+
+  populateSpecsDropdowns();
+  handleSpecsPaddyTypeChange();
+  document.getElementById('sp-submitBtn').textContent = "Save Specs Record";
+  runSpecsLiveCalculation();
+}
+
+function setSelectValueSafely(selectId, value, isNumeric = false) {
+  const selectEl = document.getElementById(selectId);
+  if (!selectEl || value === null || value === undefined) return;
+
+  let exists = false;
+  const strVal = String(value).trim();
+  for (let i = 0; i < selectEl.options.length; i++) {
+    const optVal = selectEl.options[i].value;
+    if (isNumeric) {
+      if (parseFloat(optVal) === parseFloat(value)) {
+        selectEl.selectedIndex = i;
+        exists = true;
+        break;
+      }
+    } else {
+      if (optVal.trim().toLowerCase() === strVal.toLowerCase()) {
+        selectEl.selectedIndex = i;
+        exists = true;
+        break;
+      }
+    }
+  }
+  if (!exists && value !== "") {
+    const opt = document.createElement("option");
+    opt.value = value;
+    opt.text = isNumeric ? value + '%' : value;
+    selectEl.add(opt);
+    selectEl.value = value;
+  }
+}
+
+function renderSpecsHistory() {
+  const query = (document.getElementById('sp-search') ? document.getElementById('sp-search').value : '').toLowerCase().trim();
+  const filtered = specsRecs.filter(rec => {
+    const v = rec.villageName || '';
+    return rec.farmerName.toLowerCase().includes(query) ||
+      rec.familyId.toLowerCase().includes(query) ||
+      v.toLowerCase().includes(query) ||
+      rec.paddyType.toLowerCase().includes(query) ||
+      rec.selectedGrade.toLowerCase().includes(query);
+  });
+
+  const total = filtered.length;
+  const passes = filtered.filter(r => r.isValid).length;
+  const passRate = total > 0 ? Math.round((passes / total) * 100) : 0;
+  const passingRecords = filtered.filter(r => r.isValid);
+  const avgPrice = passingRecords.length > 0 ? Math.round(passingRecords.reduce((s, r) => s + r.finalPrice, 0) / passingRecords.length) : 0;
+
+  if (document.getElementById('sp-st-total')) document.getElementById('sp-st-total').textContent = total;
+  if (document.getElementById('sp-st-rate')) document.getElementById('sp-st-rate').textContent = passRate + '%';
+  if (document.getElementById('sp-st-avg')) document.getElementById('sp-st-avg').textContent = fmtKHR(avgPrice);
+
+  const container = document.getElementById('sp-history');
+  if (!container) return;
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="empty">
+      <svg width="46" height="46" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <p>${specsRecs.length === 0 ? 'No specs inspection records saved yet. Fill the form above and click <strong>Save</strong>.' : 'No specs match your search query.'}</p>
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = '<div class="records-grid">' + filtered.map(rec => {
+    const statusBadge = rec.isValid ? `<span class="badge-status pass">Pass</span>` : `<span class="badge-status fail" title="Alt suggestion: Grade ${esc(rec.bestQualifyingGrade)}">Fail</span>`;
+    const m = rec.measurements;
+    let specsText = `Mois: ${m.moisture}% · FM: ${m.foreignMatter}%`;
+    if (m.wholeGrain !== null) specsText += ` · Whole: ${m.wholeGrain}%`;
+    if (m.purity !== null) specsText += ` · Purity: ${m.purity}%`;
+
+    return `<div class="rec-card" style="border-left:4px solid ${rec.isValid ? '#10b981' : '#ef4444'};">
+      <div class="rec-card-hdr">
+        <div>
+          <div style="font-size:0.72rem; font-weight:800; color:var(--primary); text-transform:uppercase; letter-spacing:0.04em;">🆔 ${esc(rec.familyId)}</div>
+          <div class="rec-name" style="margin-top:2px;">${esc(rec.farmerName)}</div>
+        </div>
+        <div style="display:flex; gap:4px; align-items:center;">
+          ${statusBadge}
+          <button class="btn btn-secondary btn-xs" onclick="editSpecsRecord('${esc(rec.id)}')">✏️ Edit</button>
+          <button class="btn btn-danger btn-xs" onclick="event.stopPropagation();openConfirm('Delete Specs Record','Delete specs inspection for ${esc(rec.farmerName)}?',()=>deleteSpecsRecord('${esc(rec.id)}'))">✕</button>
+        </div>
+      </div>
+      <div class="rec-meta">
+        <div class="rec-stat">📍 ${esc(rec.villageName || '—')} · 🌾 <strong>${esc(rec.paddyType)}</strong> (${esc(rec.selectedGrade)})</div>
+        <div class="rec-stat" style="font-size:0.73rem; color:var(--muted); margin-top:2px;">📊 ${esc(specsText)}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; flex-wrap:wrap; gap:6px;">
+          <div class="rec-total" style="margin:0; font-size:0.95rem;">${rec.isValid ? fmtKHR(rec.finalPrice) + '/kg' : '0 KHR (Failed Specs)'}</div>
+          <div style="display:flex; gap:4px;">
+            <button class="btn btn-primary btn-xs" onclick="createPurchaseFromSpecs('${esc(rec.id)}')" style="font-size:0.72rem;">🌾 Purchase</button>
+            <button class="btn btn-secondary btn-xs" onclick="createPaymentFromSpecs('${esc(rec.id)}')" style="font-size:0.72rem;">💳 Payment</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('') + '</div>';
+}
+
+function createPurchaseFromSpecs(specsId) {
+  const rec = specsRecs.find(r => r.id === specsId);
+  if (!rec) return;
+
+  switchTab('purchase');
+  document.getElementById('p-code').value = rec.familyId;
+  document.getElementById('p-name').value = rec.farmerName;
+  if (rec.villageName) document.getElementById('p-village').value = rec.villageName;
+
+  onFarmerLookup();
+  applyLinkedSpecs();
+  toast('Created purchase form for ' + rec.farmerName, 'ok');
+}
+
+function createPaymentFromSpecs(specsId) {
+  const rec = specsRecs.find(r => r.id === specsId);
+  if (!rec) return;
+
+  switchTab('payment');
+  document.getElementById('pay-code').value = rec.familyId;
+  document.getElementById('pay-name').value = rec.farmerName;
+  if (rec.villageName) document.getElementById('pay-village').value = rec.villageName;
+
+  toast('Opened payment setup for ' + rec.farmerName, 'inf');
+}
+
+function applyLinkedSpecs() {
+  const codeVal = (document.getElementById('p-code').value || '').trim().toUpperCase();
+  const nameVal = (document.getElementById('p-name').value || '').trim().toLowerCase();
+
+  let match = null;
+  if (codeVal) match = specsRecs.find(r => r.familyId.toUpperCase() === codeVal);
+  if (!match && nameVal) match = specsRecs.find(r => r.farmerName.toLowerCase() === nameVal);
+
+  if (!match) {
+    toast('No saved specs inspection found for this farmer.', 'err');
+    return;
+  }
+
+  document.getElementById('pr-var-1').value = match.paddyType;
+  onVariety(1);
+  document.getElementById('pr-grd-1').value = match.selectedGrade;
+  
+  if (match.isValid) {
+    document.getElementById('pr-prc-1').value = match.finalPrice;
+    const hint = document.getElementById('pr-phint-1');
+    if (hint) hint.textContent = `${match.basePrice.toLocaleString()} base + ${match.organicBonus} organic bonus = ${match.finalPrice.toLocaleString()} KHR/kg`;
+  } else {
+    document.getElementById('pr-prc-1').value = 0;
+  }
+  calcRow(1);
+  toast(`⚡ Applied Specs: ${match.paddyType} (${match.selectedGrade}) @ ${match.finalPrice.toLocaleString()} KHR/kg`, 'ok');
+}
+
+function exportSpecsCSV() {
+  if (!specsRecs.length) { toast('No specs records to export.', 'err'); return; }
+  const rows = [['Date', 'Family Code', 'Farmer Name', 'Village', 'Paddy Variety', 'Selected Grade', 'Status', 'Base Price (KHR/kg)', 'Organic Bonus (KHR/kg)', 'Final Price (KHR/kg)', 'Moisture (%)', 'Foreign Matter (%)', 'Purity (%)', 'Impurity (%)', 'Whole Grain (%)', 'Broken Rice (%)']];
+  specsRecs.forEach(r => {
+    const m = r.measurements;
+    rows.push([
+      r.date, r.familyId, r.farmerName, r.villageName || '', r.paddyType, r.selectedGrade,
+      r.isValid ? 'Pass' : 'Fail', r.basePrice || 0, r.organicBonus || 0, r.finalPrice || 0,
+      m.moisture || '', m.foreignMatter || '', m.purity || '', m.impurity || '', m.wholeGrain || '', m.brokenRice || ''
+    ]);
+  });
+  dlCSV(rows, 'specs_inspection_records_' + new Date().toISOString().split('T')[0] + '.csv');
+  toast('Specs inspection records exported!', 'ok');
 }
 
 /* ── FARMER PAYMENT MODULE LOGIC ─────────────────── */
@@ -2353,41 +3188,60 @@ function onFarmerLookup() {
   const codeInput = document.getElementById('p-code');
   const nameInput = document.getElementById('p-name');
   const villageSelect = document.getElementById('p-village');
-  const linkInfo = document.getElementById('p-payment-link-info');
-  const linkBtn = document.getElementById('p-payment-link-btn');
-  if (!linkInfo) return;
+  
+  const payInfo = document.getElementById('p-payment-link-info');
+  const payBtn  = document.getElementById('p-payment-link-btn');
+  const specInfo = document.getElementById('p-specs-link-info');
+  const specBtn  = document.getElementById('p-specs-link-btn');
 
   const codeVal = (codeInput ? codeInput.value : '').trim().toUpperCase();
   const nameVal = (nameInput ? nameInput.value : '').trim().toLowerCase();
 
-  let match = null;
-  if (codeVal) {
-    match = farmerProfiles.find(p => p.farmerId.toUpperCase() === codeVal);
-  }
-  if (!match && nameVal) {
-    match = farmerProfiles.find(p => p.producerName.toLowerCase() === nameVal);
+  // 1. Payment Profile Lookup
+  if (payInfo) {
+    let payMatch = null;
+    if (codeVal) payMatch = farmerProfiles.find(p => p.farmerId.toUpperCase() === codeVal);
+    if (!payMatch && nameVal) payMatch = farmerProfiles.find(p => p.producerName.toLowerCase() === nameVal);
+
+    if (payMatch) {
+      if (villageSelect && payMatch.village && !villageSelect.value) villageSelect.value = payMatch.village;
+      let detailStr = '';
+      if (payMatch.paymentMethod === 'Bank Transfer') {
+        detailStr = `💳 <strong>${esc(payMatch.bankName)}</strong> · Acc: <strong style="font-family:monospace;">${esc(payMatch.accountNumber)}</strong> · Holder: <strong>${esc(payMatch.accountHolderName)}</strong> (${esc(payMatch.relationship)})`;
+      } else if (payMatch.paymentMethod === 'Cash') {
+        detailStr = `💵 <strong>Cash Payment</strong> · Direct cash to farmer`;
+      } else {
+        detailStr = `📌 <strong>${esc(payMatch.paymentMethod)}</strong> · ${esc(payMatch.bankName || '')}`;
+      }
+      payInfo.innerHTML = detailStr;
+      if (payBtn) payBtn.textContent = '✏️ Edit Payment Info';
+    } else if (codeVal || nameVal) {
+      payInfo.innerHTML = `<span style="color:var(--muted); font-style:italic;">No payment profile registered for Family Code "${esc(codeVal || nameVal)}". Click button to add.</span>`;
+      if (payBtn) payBtn.textContent = '➕ Register Payment Info';
+    } else {
+      payInfo.innerHTML = `Enter Family Code to automatically link registered payment information.`;
+      if (payBtn) payBtn.textContent = '💳 Manage Payment Info';
+    }
   }
 
-  if (match) {
-    if (villageSelect && match.village && !villageSelect.value) {
-      villageSelect.value = match.village;
-    }
-    let detailStr = '';
-    if (match.paymentMethod === 'Bank Transfer') {
-      detailStr = `💳 <strong>${esc(match.bankName)}</strong> · Acc: <strong style="font-family:monospace;">${esc(match.accountNumber)}</strong> · Holder: <strong>${esc(match.accountHolderName)}</strong> (${esc(match.relationship)})`;
-    } else if (match.paymentMethod === 'Cash') {
-      detailStr = `💵 <strong>Cash Payment</strong> · Direct cash to farmer`;
+  // 2. Specs Record Lookup
+  if (specInfo) {
+    let specMatch = null;
+    if (codeVal) specMatch = specsRecs.find(r => r.familyId.toUpperCase() === codeVal);
+    if (!specMatch && nameVal) specMatch = specsRecs.find(r => r.farmerName.toLowerCase() === nameVal);
+
+    if (specMatch) {
+      if (villageSelect && specMatch.villageName && !villageSelect.value) villageSelect.value = specMatch.villageName;
+      const statusText = specMatch.isValid ? `<span style="color:var(--primary); font-weight:800;">Passed (${specMatch.finalPrice.toLocaleString()} KHR/kg)</span>` : `<span style="color:var(--danger); font-weight:800;">Failed Specs</span>`;
+      specInfo.innerHTML = `🔬 <strong>${esc(specMatch.paddyType)}</strong> (${esc(specMatch.selectedGrade)}) · Status: ${statusText} · Mois: ${specMatch.measurements.moisture}%`;
+      if (specBtn) specBtn.style.display = '';
+    } else if (codeVal || nameVal) {
+      specInfo.innerHTML = `<span style="color:var(--muted); font-style:italic;">No quality specs inspection found for "${esc(codeVal || nameVal)}".</span>`;
+      if (specBtn) specBtn.style.display = 'none';
     } else {
-      detailStr = `📌 <strong>${esc(match.paymentMethod)}</strong> · ${esc(match.bankName || '')}`;
+      specInfo.innerHTML = `Enter Family Code to automatically link quality inspection specs.`;
+      if (specBtn) specBtn.style.display = 'none';
     }
-    linkInfo.innerHTML = detailStr;
-    if (linkBtn) linkBtn.textContent = '✏️ Edit Payment Info';
-  } else if (codeVal || nameVal) {
-    linkInfo.innerHTML = `<span style="color:var(--muted); font-style:italic;">No payment profile registered for Family Code "${esc(codeVal || nameVal)}". Click button to add.</span>`;
-    if (linkBtn) linkBtn.textContent = '➕ Register Payment Info';
-  } else {
-    linkInfo.innerHTML = `Enter Family Code to automatically link registered payment information.`;
-    if (linkBtn) linkBtn.textContent = '💳 Manage Payment Info';
   }
 }
 
