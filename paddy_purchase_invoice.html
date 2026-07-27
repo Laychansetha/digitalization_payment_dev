@@ -2953,6 +2953,10 @@ function applyLinkedSpecs() {
     return;
   }
 
+  if (match.villageName) {
+    document.getElementById('p-village').value = match.villageName;
+  }
+
   document.getElementById('pr-var-1').value = match.paddyType;
   onVariety(1);
   document.getElementById('pr-grd-1').value = match.selectedGrade;
@@ -2965,7 +2969,7 @@ function applyLinkedSpecs() {
     document.getElementById('pr-prc-1').value = 0;
   }
   calcRow(1);
-  toast(`⚡ Applied Specs: ${match.paddyType} (${match.selectedGrade}) @ ${match.finalPrice.toLocaleString()} KHR/kg`, 'ok');
+  toast(`⚡ Applied Specs: ${match.paddyType} (${match.selectedGrade}) in ${match.villageName || 'Village'} @ ${match.finalPrice.toLocaleString()} KHR/kg`, 'ok');
 }
 
 function exportSpecsCSV() {
@@ -3231,9 +3235,11 @@ function onFarmerLookup() {
     if (!specMatch && nameVal) specMatch = specsRecs.find(r => r.farmerName.toLowerCase() === nameVal);
 
     if (specMatch) {
-      if (villageSelect && specMatch.villageName && !villageSelect.value) villageSelect.value = specMatch.villageName;
+      if (villageSelect && specMatch.villageName) {
+        villageSelect.value = specMatch.villageName;
+      }
       const statusText = specMatch.isValid ? `<span style="color:var(--primary); font-weight:800;">Passed (${specMatch.finalPrice.toLocaleString()} KHR/kg)</span>` : `<span style="color:var(--danger); font-weight:800;">Failed Specs</span>`;
-      specInfo.innerHTML = `🔬 <strong>${esc(specMatch.paddyType)}</strong> (${esc(specMatch.selectedGrade)}) · Status: ${statusText} · Mois: ${specMatch.measurements.moisture}%`;
+      specInfo.innerHTML = `🔬 <strong>${esc(specMatch.paddyType)}</strong> (${esc(specMatch.selectedGrade)}) · Village: <strong>${esc(specMatch.villageName || '—')}</strong> · Status: ${statusText} · Mois: ${specMatch.measurements.moisture}%`;
       if (specBtn) specBtn.style.display = '';
     } else if (codeVal || nameVal) {
       specInfo.innerHTML = `<span style="color:var(--muted); font-style:italic;">No quality specs inspection found for "${esc(codeVal || nameVal)}".</span>`;
