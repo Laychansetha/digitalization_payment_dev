@@ -51,6 +51,11 @@
       padding: 0;
     }
 
+    html, body {
+      overflow-x: hidden;
+      width: 100%;
+    }
+
     html {
       scroll-behavior: smooth;
     }
@@ -61,10 +66,16 @@
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
       line-height: 1.5;
       min-height: 100vh;
-      padding: 12px;
+      padding: 8px;
     }
 
     @media(min-width:640px) {
+      body {
+        padding: 16px;
+      }
+    }
+
+    @media(min-width:1024px) {
       body {
         padding: 20px;
       }
@@ -75,7 +86,15 @@
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 12px;
+      width: 100%;
+      overflow-x: hidden;
+    }
+
+    @media(min-width:640px) {
+      .container {
+        gap: 18px;
+      }
     }
 
     /* ─── APP HEADER ─────────────────────────────── */
@@ -84,24 +103,39 @@
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 12px;
-      padding: 16px 22px;
+      gap: 8px;
+      padding: 10px 12px;
       background: linear-gradient(135deg, #1e293b, var(--panel));
       border: 1px solid var(--border);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
     }
 
+    @media(min-width:640px) {
+      .app-header {
+        padding: 16px 22px;
+        gap: 12px;
+      }
+    }
+
     .header-brand {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    @media(min-width:640px) {
+      .header-brand {
+        gap: 14px;
+      }
     }
 
     .header-logo {
-      width: 46px;
-      height: 46px;
-      border-radius: 11px;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
       flex-shrink: 0;
       background: linear-gradient(135deg, var(--primary), var(--accent));
       display: flex;
@@ -110,11 +144,25 @@
     }
 
     .header-logo svg {
+      width: 20px;
+      height: 20px;
       color: #0b0f19;
     }
 
+    @media(min-width:640px) {
+      .header-logo {
+        width: 46px;
+        height: 46px;
+        border-radius: 11px;
+      }
+      .header-logo svg {
+        width: 26px;
+        height: 26px;
+      }
+    }
+
     .header-title {
-      font-size: 1.15rem;
+      font-size: 0.9rem;
       font-weight: 800;
       letter-spacing: -0.02em;
       line-height: 1.2;
@@ -122,23 +170,53 @@
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    @media(min-width:640px) {
+      .header-title {
+        font-size: 1.15rem;
+        white-space: normal;
+      }
     }
 
     .header-sub {
-      font-size: 0.78rem;
+      font-size: 0.68rem;
       color: var(--muted);
-      margin-top: 2px;
+      margin-top: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    @media(min-width:640px) {
+      .header-sub {
+        font-size: 0.78rem;
+        margin-top: 2px;
+        white-space: normal;
+      }
     }
 
     .header-badge {
-      font-size: 0.73rem;
+      font-size: 0.65rem;
       font-weight: 700;
       background: var(--success-bg);
       color: var(--accent);
       border: 1px solid rgba(52, 211, 153, 0.22);
-      padding: 5px 12px;
-      border-radius: 20px;
+      padding: 3px 8px;
+      border-radius: 14px;
       white-space: nowrap;
+      align-self: center;
+    }
+
+    @media(min-width:640px) {
+      .header-badge {
+        font-size: 0.73rem;
+        padding: 5px 12px;
+        border-radius: 20px;
+      }
     }
 
     /* ─── TAB NAV ────────────────────────────────── */
@@ -148,25 +226,72 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 6px;
+      padding: 4px;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .tab-nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    @media(min-width:640px) {
+      .tab-nav {
+        padding: 6px;
+      }
     }
 
     .tab-btn {
-      flex: 1;
+      flex: 1 1 0px;
+      min-width: 0;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 8px;
-      padding: 12px 18px;
+      gap: 3px;
+      padding: 8px 4px;
       border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 600;
+      font-size: 0.72rem;
+      font-weight: 700;
       font-family: inherit;
       cursor: pointer;
       border: none;
       color: var(--muted);
       background: transparent;
       transition: var(--tr);
+      text-align: center;
+      white-space: nowrap;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .tab-btn svg {
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+    }
+
+    .tab-txt {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    @media(min-width:640px) {
+      .tab-btn {
+        flex-direction: row;
+        gap: 8px;
+        padding: 12px 16px;
+        font-size: 0.88rem;
+      }
+      .tab-btn svg {
+        width: 17px;
+        height: 17px;
+      }
     }
 
     .tab-btn.active {
@@ -183,7 +308,13 @@
     .tab-content {
       display: none;
       flex-direction: column;
-      gap: 18px;
+      gap: 12px;
+    }
+
+    @media(min-width:640px) {
+      .tab-content {
+        gap: 18px;
+      }
     }
 
     .tab-content.active {
@@ -208,12 +339,20 @@
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 22px;
+      padding: 14px 14px;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.12);
+      max-width: 100%;
+      overflow: hidden;
+    }
+
+    @media(min-width:640px) {
+      .card {
+        padding: 22px;
+      }
     }
 
     .card-title {
-      font-size: 0.95rem;
+      font-size: 0.88rem;
       font-weight: 700;
       color: #fff;
       display: flex;
@@ -233,7 +372,7 @@
     .fg {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 12px;
+      gap: 8px;
     }
 
     @media(min-width:480px) {
@@ -243,6 +382,9 @@
     }
 
     @media(min-width:640px) {
+      .fg {
+        gap: 12px;
+      }
       .fg-3 {
         grid-template-columns: 1fr 1fr 1fr;
       }
@@ -257,15 +399,23 @@
     .fgroup {
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 3px;
+      width: 100%;
     }
 
     label {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       font-weight: 700;
       color: var(--muted);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
+    }
+
+    @media(min-width:640px) {
+      label {
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+      }
     }
 
     input[type=text],
@@ -278,13 +428,26 @@
       border: 1px solid var(--input-bdr);
       border-radius: var(--radius-xs);
       color: var(--text);
-      padding: 10px 12px;
-      font-size: 0.88rem;
+      padding: 8px 10px;
+      font-size: 0.85rem;
       font-family: inherit;
       width: 100%;
       transition: var(--tr);
-      min-height: 44px;
+      min-height: 40px;
       box-sizing: border-box;
+    }
+
+    @media(min-width:640px) {
+      input[type=text],
+      input[type=number],
+      input[type=date],
+      input[type=time],
+      select,
+      textarea {
+        padding: 10px 12px;
+        font-size: 0.88rem;
+        min-height: 44px;
+      }
     }
 
     input:focus,
@@ -311,12 +474,21 @@
       appearance: none;
       -webkit-appearance: none;
       -moz-appearance: none;
-      background: var(--input-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center / 14px 14px;
-      padding-right: 38px !important;
-      padding-left: 12px !important;
+      background: var(--input-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center / 14px 14px;
+      padding-right: 32px !important;
+      padding-left: 10px !important;
       cursor: pointer;
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       line-height: 1.4;
+    }
+
+    @media(min-width:640px) {
+      select {
+        background-position: right 12px center;
+        padding-right: 38px !important;
+        padding-left: 12px !important;
+        font-size: 0.88rem;
+      }
     }
 
     select option {
@@ -330,14 +502,22 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 15px;
+      padding: 10px 12px;
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       cursor: pointer;
       user-select: none;
-      min-height: 52px;
-      gap: 12px;
+      min-height: 46px;
+      gap: 10px;
+    }
+
+    @media(min-width:640px) {
+      .toggle-row {
+        padding: 12px 15px;
+        min-height: 52px;
+        gap: 12px;
+      }
     }
 
     .toggle-info {
@@ -347,20 +527,26 @@
     }
 
     .toggle-title {
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 600;
       color: var(--text);
     }
 
+    @media(min-width:640px) {
+      .toggle-title {
+        font-size: 0.9rem;
+      }
+    }
+
     .toggle-desc {
-      font-size: 0.73rem;
+      font-size: 0.7rem;
       color: var(--muted);
     }
 
     .switch {
       position: relative;
       display: inline-block;
-      width: 50px;
+      width: 46px;
       height: 26px;
       flex-shrink: 0;
     }
@@ -397,20 +583,20 @@
     }
 
     input:checked+.slider:before {
-      transform: translateX(24px);
+      transform: translateX(20px);
     }
 
     /* ─── STATUS PILLS ───────────────────────────── */
     .pills {
       display: flex;
-      gap: 7px;
+      gap: 6px;
       flex-wrap: wrap;
     }
 
     .pill {
-      padding: 7px 14px;
+      padding: 6px 12px;
       border-radius: 20px;
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       font-weight: 700;
       cursor: pointer;
       border: 1px solid var(--input-bdr);
@@ -420,6 +606,7 @@
       transition: var(--tr);
       min-height: 36px;
       letter-spacing: 0.02em;
+      touch-action: manipulation;
     }
 
     .pill:hover {
@@ -474,10 +661,16 @@
       background: rgba(255, 255, 255, 0.018);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 16px;
+      padding: 12px 14px;
       margin-bottom: 10px;
       border-left: 3px solid var(--primary);
       transition: var(--tr);
+    }
+
+    @media(min-width:640px) {
+      .item-row {
+        padding: 16px;
+      }
     }
 
     .item-row.amber {
@@ -524,7 +717,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px 16px;
+      padding: 10px 14px;
       border-radius: 8px;
       margin: 4px 0 14px;
     }
@@ -540,14 +733,23 @@
     }
 
     .sub-lbl {
-      font-size: 0.83rem;
+      font-size: 0.78rem;
       color: var(--muted);
       font-weight: 500;
     }
 
     .sub-val {
-      font-size: 1rem;
+      font-size: 0.92rem;
       font-weight: 800;
+    }
+
+    @media(min-width:640px) {
+      .sub-lbl {
+        font-size: 0.83rem;
+      }
+      .sub-val {
+        font-size: 1rem;
+      }
     }
 
     .sub-val.green {
@@ -562,29 +764,50 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 16px 20px;
+      padding: 12px 14px;
       border-radius: 10px;
       margin-top: 6px;
       background: linear-gradient(135deg, rgba(245, 158, 11, 0.13), rgba(245, 158, 11, 0.06));
       border: 1px solid var(--gold-border);
     }
 
+    @media(min-width:640px) {
+      .total-bar {
+        padding: 16px 20px;
+      }
+    }
+
     .total-lbl {
-      font-size: 0.95rem;
+      font-size: 0.88rem;
       color: var(--text);
       font-weight: 700;
     }
 
     .total-sub {
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       color: var(--muted);
       margin-top: 2px;
     }
 
+    @media(min-width:640px) {
+      .total-lbl {
+        font-size: 0.95rem;
+      }
+      .total-sub {
+        font-size: 0.72rem;
+      }
+    }
+
     .total-val {
-      font-size: 1.5rem;
+      font-size: 1.25rem;
       font-weight: 800;
       color: var(--gold);
+    }
+
+    @media(min-width:640px) {
+      .total-val {
+        font-size: 1.5rem;
+      }
     }
 
     /* ─── BUTTONS ────────────────────────────────── */
@@ -592,17 +815,28 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 7px;
-      padding: 11px 18px;
+      gap: 6px;
+      padding: 8px 14px;
       border-radius: var(--radius-xs);
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 700;
       font-family: inherit;
       cursor: pointer;
       border: none;
       transition: var(--tr);
-      min-height: 44px;
+      min-height: 40px;
       white-space: nowrap;
+      touch-action: manipulation;
+      user-select: none;
+    }
+
+    @media(min-width:640px) {
+      .btn {
+        padding: 11px 18px;
+        font-size: 0.9rem;
+        min-height: 44px;
+        gap: 7px;
+      }
     }
 
     .btn-primary {
@@ -647,34 +881,42 @@
     }
 
     .btn-sm {
-      padding: 8px 13px;
-      font-size: 0.82rem;
+      padding: 6px 12px;
+      font-size: 0.8rem;
       min-height: 36px;
     }
 
     .btn-xs {
-      padding: 5px 10px;
-      font-size: 0.75rem;
-      min-height: 30px;
+      padding: 4px 8px;
+      font-size: 0.73rem;
+      min-height: 32px;
     }
 
     .actions-bar {
       display: flex;
       align-items: center;
-      gap: 9px;
+      gap: 8px;
       flex-wrap: wrap;
+      width: 100%;
+    }
+
+    @media(max-width:640px) {
+      .actions-bar > .btn {
+        flex: 1 1 auto;
+      }
     }
 
     /* ─── SIGNATURE PADS ─────────────────────────── */
     .sig-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 14px;
+      gap: 12px;
     }
 
-    @media(min-width:480px) {
+    @media(min-width:560px) {
       .sig-grid {
         grid-template-columns: 1fr 1fr;
+        gap: 14px;
       }
     }
 
@@ -682,7 +924,13 @@
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 14px;
+      padding: 12px;
+    }
+
+    @media(min-width:640px) {
+      .sig-card {
+        padding: 14px;
+      }
     }
 
     .sig-title {
@@ -737,21 +985,26 @@
     /* ─── TRANSPORT TABLE ────────────────────────── */
     .t-wrap {
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       border-radius: 8px;
       border: 1px solid var(--border);
+      width: 100%;
+      max-width: 100%;
+      position: relative;
     }
 
     .t-table {
       width: 100%;
-      border-collapse: collapse;
-      min-width: 680px;
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 580px;
     }
 
     .t-table th {
-      background: rgba(255, 255, 255, 0.04);
-      padding: 10px 11px;
+      background: #1a2440;
+      padding: 8px 10px;
       text-align: left;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -764,14 +1017,25 @@
       padding: 6px 8px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.04);
       vertical-align: middle;
+      background: var(--panel);
     }
 
-    .t-table tr:last-child td {
-      border-bottom: none;
+    /* Sticky Freeze First Column */
+    .t-table th:first-child,
+    .t-table td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 3;
+      background: var(--panel2);
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
     }
 
     .t-table tr:hover td {
-      background: rgba(255, 255, 255, 0.018);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .t-table tr:hover td:first-child {
+      background: #1e2a4a;
     }
 
     .t-table input,
@@ -780,7 +1044,7 @@
       border: 1px solid transparent;
       padding: 6px 8px;
       min-height: 36px;
-      font-size: 0.87rem;
+      font-size: 0.85rem;
     }
 
     .t-table input:focus,
@@ -801,12 +1065,13 @@
     .journey-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 14px;
+      gap: 12px;
     }
 
     @media(min-width:640px) {
       .journey-grid {
         grid-template-columns: 1fr 1fr;
+        gap: 14px;
       }
     }
 
@@ -814,7 +1079,13 @@
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 15px;
+      padding: 12px;
+    }
+
+    @media(min-width:640px) {
+      .journey-sec {
+        padding: 15px;
+      }
     }
 
     .journey-title {
@@ -822,7 +1093,7 @@
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -839,26 +1110,67 @@
     /* ─── STATS ROW ──────────────────────────────── */
     .stats-row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
     }
 
-    @media(min-width:480px) {
+    @media(min-width:640px) {
       .stats-row {
         grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
       }
     }
 
     .stat-card {
       background: rgba(255, 255, 255, 0.025);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 13px;
+      border-radius: 8px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    @media(min-width:640px) {
+      .stat-card {
+        border-radius: 10px;
+        padding: 13px;
+      }
     }
 
     .stat-lbl {
-      font-size: 0.7rem;
+      font-size: 0.64rem;
       font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      line-height: 1.2;
+    }
+
+    @media(min-width:640px) {
+      .stat-lbl {
+        font-size: 0.7rem;
+        letter-spacing: 0.04em;
+      }
+    }
+
+    .stat-val {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-top: 2px;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    @media(min-width:640px) {
+      .stat-val {
+        font-size: 1.25rem;
+        margin-top: 4px;
+      }
+    }
       color: var(--muted);
       text-transform: uppercase;
       letter-spacing: 0.04em;
@@ -1458,6 +1770,22 @@
       .hidden {
         display: none !important;
       }
+
+      .live-calc-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        margin-top: 12px;
+        text-align: center;
+      }
+
+      @media (min-width: 480px) {
+        .live-calc-grid {
+          grid-template-columns: repeat(3, 1fr);
+          gap: 10px;
+          margin-top: 14px;
+        }
+      }
   </style>
 </head>
 
@@ -1496,7 +1824,7 @@
           <circle cx="11" cy="11" r="8" />
           <path d="M21 21l-4.35-4.35" />
         </svg>
-        🔬 1. Specs Record
+        <span class="tab-txt">🔬 1. Specs Record</span>
       </button>
       <button class="tab-btn" onclick="switchTab('payment')" id="tab-payment">
         <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"
@@ -1504,7 +1832,7 @@
           <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
           <line x1="1" y1="10" x2="23" y2="10" />
         </svg>
-        💳 2. Farmer Payment Info
+        <span class="tab-txt">💳 2. Payment Info</span>
       </button>
       <button class="tab-btn" onclick="switchTab('purchase')" id="tab-purchase">
         <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"
@@ -1512,7 +1840,7 @@
           <path
             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
-        🌾 3. Purchase Record
+        <span class="tab-txt">🌾 3. Purchase Record</span>
       </button>
       <button class="tab-btn" onclick="switchTab('transport')" id="tab-transport">
         <svg width="17" height="17" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"
@@ -1522,7 +1850,7 @@
           <circle cx="5.5" cy="18.5" r="2.5" />
           <circle cx="18.5" cy="18.5" r="2.5" />
         </svg>
-        🚛 4. Transport Record
+        <span class="tab-txt">🚛 4. Transport Record</span>
       </button>
     </nav>
 
@@ -1672,7 +2000,7 @@
             <span>Evaluating Specs...</span>
           </div>
 
-          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:14px; text-align:center;">
+          <div class="live-calc-grid">
             <div style="padding:10px; background:var(--input-bg); border-radius:8px; border:1px solid var(--border);">
               <div style="font-size:0.68rem; font-weight:700; color:var(--muted); text-transform:uppercase;">Base Grade
                 Price</div>
@@ -2153,7 +2481,7 @@
           </svg>
           Transport &amp; Driver Info
         </div>
-        <div style="margin-bottom:14px; max-width: 300px;">
+        <div style="margin-bottom:14px; width:100%; max-width:300px;">
           <div class="fgroup">
             <label for="t-date">Transport Date</label>
             <input type="date" id="t-date">
@@ -2752,7 +3080,11 @@
     function switchTab(t) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      document.getElementById('tab-' + t).classList.add('active');
+      const activeTab = document.getElementById('tab-' + t);
+      if (activeTab) {
+        activeTab.classList.add('active');
+        activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
       document.getElementById('content-' + t).classList.add('active');
       setTimeout(() => Object.values(sigPads).forEach(p => p.resize()), 60);
     }
