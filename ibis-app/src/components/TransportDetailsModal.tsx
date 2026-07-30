@@ -1,0 +1,269 @@
+'use client';
+
+import { X, Truck, Calendar, User, MapPin, Package, Scale, ShieldCheck, FileSpreadsheet } from 'lucide-react';
+
+interface TransportDetailsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  transport: any;
+}
+
+export default function TransportDetailsModal({ isOpen, onClose, transport }: TransportDetailsModalProps) {
+  if (!isOpen || !transport) return null;
+
+  const purchases = transport.purchases || [];
+  const transportIdFormatted = `TR-2026-${transport.id.slice(-6).toUpperCase()}`;
+  const uniqueFarmersCount = new Set(purchases.map((p: any) => p.familyCode)).size;
+
+  // EXPORT SINGLE TRUCK MANIFEST & PURCHASE RECORDS TO CSV
+  const exportSingleTruckCSV = () => {
+    if (!transport) return;
+
+    const rows: any[][] = [];
+
+    // TOP SUMMARY SECTION
+    rows.push(['=== TRUCK DISPATCH MANIFEST SUMMARY ===']);
+    rows.push([
+      'Transport ID',
+      'Dispatch Date & Time',
+      'Driver Name',
+      'Truck Plate Number',
+      'Loading Location',
+      'Destination',
+      'Total Farmers',
+      'Total Purchase Records',
+      'Total Number of Sacks',
+      'Total Field Weight (Kg)',
+    ]);
+    rows.push([
+      transportIdFormatted,
+      new Date(transport.createdAt).toLocaleString(),
+      transport.driverName || '',
+      transport.plateNumber || '',
+      transport.loadingLocation || 'Chhaeb Buying Station',
+      transport.destinationWarehouse || 'Central Mill Warehouse, Preah Vihear',
+      uniqueFarmersCount,
+      purchases.length,
+      transport.totalSacks || 0,
+      transport.totalFieldWeight || 0,
+    ]);
+
+    // ITEMIZED PURCHASE RECORDS SECTION
+    rows.push([]);
+    rows.push(['--- ASSIGNED PURCHASE RECORDS (INVOICES) ---']);
+    rows.push([
+      'Purchase ID',
+      'Family Code',
+      'Farmer Name',
+      'Village',
+      'Paddy Variety',
+      'Grade',
+      'Number of Sacks',
+      'Total Weight (Kg)',
+      'Purchasing Staff',
+    ]);
+
+    if (purchases.length === 0) {
+      rows.push(['N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A', 0, 0, 'N/A']);
+    } else {
+      purchases.forEach((p: any) => {
+        const item = p.items?.[0] || {};
+        const pIdFormatted = `PR-2026-${p.id.slice(-6).toUpperCase()}`;
+        rows.push([
+          pIdFormatted,
+          p.familyCode || '',
+          p.farmerName || '',
+          p.village || '',
+          item.variety || 'Red Jasmine',
+          item.grade || 'A1',
+          item.sacks || 0,
+          p.totalWeight || 0,
+          p.purchasingStaffName || 'Field Staff',
+        ]);
+      });
+    }
+
+    const csvContent =
+      'data:text/csv;charset=utf-8,\uFEFF' +
+      rows.map((e) => e.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `Truck_Manifest_${transportIdFormatted}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-[#141c2f] border border-white/10 rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        {/* Modal Header */}
+        <div className="p-4 bg-white/5 border-b border-white/10 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-sky-500/10 border border-sky-500/30 rounded-xl flex items-center justify-center text-sky-400 font-extrabold text-xs">
+              🚛
+            </div>
+            <div>
+              <h3 className="font-extrabold text-sm text-white flex items-center gap-2">
+                Transport Dispatch Record Details
+                <span className="bg-sky-500/20 text-sky-300 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full">
+                  {transportIdFormatted}
+                </span>
+              </h3>
+              <p className="text-[11px] text-slate-400">
+                Dispatched on {new Date(transport.createdAt).toLocaleString()} by {transport.fieldStaffName || 'Field Inspector'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={exportSingleTruckCSV}
+              className="bg-[#10b981] hover:bg-[#059669] text-[#0b0f19] px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-md"
+            >
+              <FileSpreadsheet className="w-4 h-4" /> Export Truck CSV
+            </button>
+            <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-white rounded-lg">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Modal Body */}
+        <div className="p-5 overflow-y-auto space-y-5 text-xs flex-1">
+          {/* Driver & Truck Info */}
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-white/5 border border-white/10 rounded-xl p-3">
+            <div>
+              <span className="text-slate-400 font-bold uppercase text-[10px] block">Driver Name</span>
+              <span className="text-white font-bold">{transport.driverName}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 font-bold uppercase text-[10px] block">Truck Plate Number</span>
+              <span className="text-sky-400 font-extrabold font-mono text-sm">{transport.plateNumber}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 font-bold uppercase text-[10px] block">Mobile Number</span>
+              <span className="text-slate-200 font-mono">{transport.mobileNumber || 'N/A'}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 font-bold uppercase text-[10px] block">Truck Sanitized</span>
+              <span className={`font-bold ${transport.truckCleaned ? 'text-emerald-400' : 'text-amber-400'}`}>
+                {transport.truckCleaned ? '✓ Inspection Passed' : 'Not Inspected'}
+              </span>
+            </div>
+          </div>
+
+          {/* Locations Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-[#0f172a] border border-sky-500/30 rounded-xl">
+            <div>
+              <span className="text-slate-400 block text-[10px] font-bold uppercase">Loading Station</span>
+              <span className="font-bold text-white flex items-center gap-1">
+                <MapPin className="w-3.5 h-3.5 text-purple-400" /> {transport.loadingLocation || 'Chhaeb Buying Station'}
+              </span>
+            </div>
+            <div>
+              <span className="text-slate-400 block text-[10px] font-bold uppercase">Destination Warehouse</span>
+              <span className="font-bold text-sky-400 flex items-center gap-1">
+                <MapPin className="w-3.5 h-3.5 text-sky-400" /> {transport.destinationWarehouse || 'Central Mill Warehouse, Preah Vihear'}
+              </span>
+            </div>
+          </div>
+
+          {/* Summary Badges */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
+              <span className="text-slate-400 block text-[10px] uppercase font-bold">Total Farmers</span>
+              <span className="font-extrabold text-white text-sm">{uniqueFarmersCount} Farmers</span>
+            </div>
+            <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
+              <span className="text-slate-400 block text-[10px] uppercase font-bold">Assigned Invoices</span>
+              <span className="font-extrabold text-emerald-400 text-sm">{purchases.length} Purchase Records</span>
+            </div>
+            <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
+              <span className="text-slate-400 block text-[10px] uppercase font-bold">Total Sacks Loaded</span>
+              <span className="font-extrabold text-amber-400 text-sm">{transport.totalSacks} Sacks</span>
+            </div>
+            <div className="p-3 bg-sky-500/10 border border-sky-500/30 rounded-xl">
+              <span className="text-sky-400 block text-[10px] uppercase font-bold">Total Truck Field Weight</span>
+              <span className="font-black text-sky-400 text-base">{transport.totalFieldWeight.toFixed(2)} kg</span>
+            </div>
+          </div>
+
+          {/* Assigned Purchase Records Table */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h4 className="font-extrabold text-xs text-slate-200 uppercase tracking-wider">
+                📦 Cargo Manifest (Assigned Farmer Purchase Records)
+              </h4>
+              <button
+                onClick={exportSingleTruckCSV}
+                className="text-emerald-400 hover:text-emerald-300 font-bold text-xs flex items-center gap-1"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5" /> Download Manifest CSV
+              </button>
+            </div>
+
+            <div className="overflow-x-auto border border-white/10 rounded-xl">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-white/5 text-slate-400 uppercase font-bold border-b border-white/10">
+                  <tr>
+                    <th className="p-3">Purchase ID</th>
+                    <th className="p-3">Family Code</th>
+                    <th className="p-3">Farmer Name</th>
+                    <th className="p-3">Village</th>
+                    <th className="p-3">Variety / Grade</th>
+                    <th className="p-3 text-center">Sacks</th>
+                    <th className="p-3 text-right">Weight (kg)</th>
+                    <th className="p-3 text-right">Net Payment</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {purchases.map((p: any) => {
+                    const item = p.items?.[0] || {};
+                    const pIdFormatted = `PR-2026-${p.id.slice(-6).toUpperCase()}`;
+
+                    return (
+                      <tr key={p.id} className="hover:bg-white/5">
+                        <td className="p-3 font-mono font-bold text-sky-400">{pIdFormatted}</td>
+                        <td className="p-3 font-extrabold text-amber-400">{p.familyCode}</td>
+                        <td className="p-3 font-bold text-white">{p.farmerName}</td>
+                        <td className="p-3 text-slate-300">{p.village}</td>
+                        <td className="p-3 font-bold text-slate-200">
+                          {item.variety || 'Red Jasmine'} ({item.grade || 'A1'})
+                        </td>
+                        <td className="p-3 text-center font-bold text-white">{item.sacks || 0}</td>
+                        <td className="p-3 text-right font-mono font-bold text-sky-400">
+                          {p.totalWeight.toFixed(2)} kg
+                        </td>
+                        <td className="p-3 text-right font-mono font-bold text-emerald-400">
+                          {p.netPayment.toLocaleString()} KHR
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Modal Footer */}
+        <div className="p-4 bg-white/5 border-t border-white/10 flex items-center justify-between">
+          <button
+            onClick={exportSingleTruckCSV}
+            className="bg-[#10b981] hover:bg-[#059669] text-[#0b0f19] px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-2 shadow-lg shadow-emerald-500/20"
+          >
+            <FileSpreadsheet className="w-4 h-4" /> Export Truck CSV
+          </button>
+          <button
+            onClick={onClose}
+            className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-xs font-bold transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

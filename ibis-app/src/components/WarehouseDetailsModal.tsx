@@ -1,0 +1,358 @@
+'use client';
+
+import { X, Scale, Camera, Eye, MapPin, User, Package, CheckCircle2, AlertTriangle, XCircle, FileSpreadsheet } from 'lucide-react';
+
+interface WarehouseDetailsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  intake: any;
+  maxTolerancePercent?: number; // Configurable tolerance from Admin Settings
+}
+
+export default function WarehouseDetailsModal({
+  isOpen,
+  onClose,
+  intake,
+  maxTolerancePercent = 1.0,
+}: WarehouseDetailsModalProps) {
+  if (!isOpen || !intake) return null;
+
+  const transport = intake.transport || {};
+  const purchases = transport.purchases || [];
+  const receivingIdFormatted = `WR-2026-${intake.id.slice(-6).toUpperCase()}`;
+  const transportIdFormatted = `TR-2026-${transport.id?.slice(-6).toUpperCase()}`;
+
+  const fieldWeight = transport.totalFieldWeight || 0;
+  const netWeight = intake.warehouseNetWeight || 0;
+  const diffKg = intake.weightDiffKg !== undefined && intake.weightDiffKg !== null ? intake.weightDiffKg : (netWeight - fieldWeight);
+  const diffPercent = Math.abs(intake.weightDiffPercent !== undefined && intake.weightDiffPercent !== null
+    ? intake.weightDiffPercent
+    : (fieldWeight > 0 ? (diffKg / fieldWeight) * 100 : 0));
+
+  // 3. COLOR TOLERANCE BADGE
+  let toleranceStatus: 'green' | 'yellow' | 'red' = 'green';
+  let toleranceText = 'Normal — Within Tolerance';
+
+  if (diffPercent > maxTolerancePercent * 2) {
+    toleranceStatus = 'red';
+    toleranceText = `CRITICAL — Exceeds ${maxTolerancePercent}% Tolerance!`;
+  } else if (diffPercent > maxTolerancePercent) {
+    toleranceStatus = 'yellow';
+    toleranceText = `WARNING — Slight Variance (> ${maxTolerancePercent}%)`;
+  }
+
+  // EXPORT WAREHOUSE TRUCK MANIFEST CSV
+  const exportTruckManifestCSV = () => {
+    if (!purchases || purchases.length === 0) {
+      alert('No purchase records loaded on this truck intake.');
+      return;
+    }
+
+    const grossWeight = intake.warehouseGrossWeight || 0;
+    const tareWeight = intake.warehouseTareWeight || 0;
+    const receivingDateTime = new Date(intake.createdAt).toLocaleString();
+    const warehouseStaff = intake.receivingStaffName || 'Warehouse Staff';
+    const totalFarmers = new Set(purchases.map((p: any) => p.familyCode)).size;
+    const totalSacks = purchases.reduce((acc: number, p: any) => acc + (p.items?.[0]?.sacks || 0), 0);
+
+    // 1. Summary Section at Top
+    const summaryRows = [
+      ['SUMMARY - WAREHOUSE RECEIVING TRUCK MANIFEST', ''],
+      ['Warehouse Receiving ID', receivingIdFormatted],
+      ['Transport ID', transportIdFormatted],
+      ['Driver Name', transport.driverName || 'N/A'],
+      ['Truck Plate Number', transport.plateNumber || 'N/A'],
+      ['Receiving Date & Time', receivingDateTime],
+      ['Warehouse Staff', warehouseStaff],
+      ['Total Farmers', totalFarmers],
+      ['Total Purchase Records', purchases.length],
+      ['Total Number of Sacks', totalSacks],
+      ['Total Field Weight (Kg)', fieldWeight.toFixed(2)],
+      ['Warehouse Gross Weight (Kg)', grossWeight.toFixed(2)],
+      ['Warehouse Tare Weight (Kg)', tareWeight.toFixed(2)],
+      ['Warehouse Net Weight (Kg)', netWeight.toFixed(2)],
+      ['Weight Difference (Kg)', `${diffKg >= 0 ? '+' : ''}${diffKg.toFixed(2)}`],
+      ['Weight Difference (%)', `${diffPercent >= 0 ? '+' : ''}${diffPercent.toFixed(2)}%`],
+      ['', ''], // Empty row separator
+    ];
+
+    // 2. Itemized Manifest Columns
+    const itemHeaders = [
+      'Warehouse Receiving ID',
+      'Transport ID',
+      'Purchase ID',
+      'Family Code',
+      'Farmer Name',
+      'Village',
+      'Paddy Variety',
+      'Grade',
+      'Number of Sacks',
+      'Field Weight (Kg)',
+      'Warehouse Gross Weight (Kg)',
+      'Warehouse Tare Weight (Kg)',
+      'Warehouse Net Weight (Kg)',
+      'Weight Difference (Kg)',
+      'Driver Name',
+      'Truck Plate Number',
+      'Receiving Date & Time',
+      'Warehouse Staff',
+    ];
+
+    const rows = [...summaryRows, itemHeaders];
+
+    purchases.forEach((p: any) => {
+      const item = p.items?.[0] || {};
+      const pIdFormatted = `PR-2026-${p.id.slice(-6).toUpperCase()}`;
+
+      rows.push([
+        receivingIdFormatted,
+        transportIdFormatted,
+        pIdFormatted,
+        p.familyCode || '',
+        p.farmerName || '',
+        p.village || '',
+        item.variety || 'Red Jasmine',
+        item.grade || 'A1',
+        item.sacks || 0,
+        (p.totalWeight || 0).toFixed(2),
+        grossWeight.toFixed(2),
+        tareWeight.toFixed(2),
+        netWeight.toFixed(2),
+        `${diffKg >= 0 ? '+' : ''}${diffKg.toFixed(2)}`,
+        transport.driverName || 'N/A',
+        transport.plateNumber || 'N/A',
+        receivingDateTime,
+        warehouseStaff,
+      ]);
+    });
+
+    const csvContent =
+      'data:text/csv;charset=utf-8,\uFEFF' +
+      rows.map((e) => e.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    const dateStr = new Date().toISOString().split('T')[0];
+    const safeWrId = receivingIdFormatted.replace(/[^a-zA-Z0-9-]/g, '_');
+
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `Warehouse_Receiving_${safeWrId}_${dateStr}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-[#141c2f] border border-white/10 rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        {/* Modal Header */}
+        <div className="p-4 bg-white/5 border-b border-white/10 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-sky-500/10 border border-sky-500/30 rounded-xl flex items-center justify-center text-sky-400 font-extrabold text-xs">
+              🏬
+            </div>
+            <div>
+              <h3 className="font-extrabold text-sm text-white flex items-center gap-2">
+                Warehouse Receiving Scale Record
+                <span className="bg-sky-500/20 text-sky-300 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full">
+                  {receivingIdFormatted}
+                </span>
+              </h3>
+              <p className="text-[11px] text-slate-400">
+                Received on {new Date(intake.createdAt).toLocaleString()} by {intake.receivingStaffName || 'Warehouse Staff'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={exportTruckManifestCSV}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl font-extrabold text-xs flex items-center gap-1.5 shadow-md transition-colors"
+              title="Export Truck Manifest to CSV for Warehouse Record-Keeping"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-200" />
+              <span>Export Truck Manifest (CSV)</span>
+            </button>
+            <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-white rounded-lg">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Modal Body */}
+        <div className="p-5 overflow-y-auto space-y-5 text-xs">
+          {/* Transport Details Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-white/5 border border-white/10 rounded-xl p-3">
+            <div>
+              <span className="text-slate-400 font-bold uppercase text-[10px] block">Transport ID</span>
+              <span className="text-sky-400 font-mono font-bold">{transportIdFormatted}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 font-bold uppercase text-[10px] block">Driver Name</span>
+              <span className="text-white font-bold">{transport.driverName || 'N/A'}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 font-bold uppercase text-[10px] block">Truck Plate Number</span>
+              <span className="text-sky-400 font-mono font-extrabold">{transport.plateNumber || 'N/A'}</span>
+            </div>
+            <div>
+              <span className="text-slate-400 font-bold uppercase text-[10px] block">Receiving Staff</span>
+              <span className="text-emerald-400 font-bold">👤 {intake.receivingStaffName || 'Warehouse Staff'}</span>
+            </div>
+          </div>
+
+          {/* 3. WEIGHT COMPARISON BOX & COLOR HIGHLIGHTING */}
+          <div className="p-4 bg-[#0f172a] border border-sky-500/30 rounded-xl space-y-3 shadow-xl">
+            <div className="flex items-center justify-between border-b border-sky-500/20 pb-2">
+              <span className="font-extrabold text-xs text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Scale className="w-4 h-4" /> Weight Comparison & Scale Verification
+              </span>
+              <span
+                className={`px-3 py-1 rounded-full text-[10px] font-extrabold flex items-center gap-1 ${
+                  toleranceStatus === 'green'
+                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                    : toleranceStatus === 'yellow'
+                    ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                    : 'bg-red-500/10 text-red-400 border border-red-500/30'
+                }`}
+              >
+                {toleranceStatus === 'green' && <CheckCircle2 className="w-3.5 h-3.5" />}
+                {toleranceStatus === 'yellow' && <AlertTriangle className="w-3.5 h-3.5" />}
+                {toleranceStatus === 'red' && <XCircle className="w-3.5 h-3.5" />}
+                {toleranceText}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
+                <span className="text-slate-400 block text-[10px] uppercase font-bold">Field Dispatch Weight</span>
+                <span className="font-mono font-bold text-slate-200 text-sm">{fieldWeight.toFixed(2)} kg</span>
+              </div>
+
+              <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
+                <span className="text-slate-400 block text-[10px] uppercase font-bold">Gross Scale Weight</span>
+                <span className="font-mono font-bold text-sky-300 text-sm">{intake.warehouseGrossWeight.toFixed(2)} kg</span>
+              </div>
+
+              <div className="p-3 bg-white/5 border border-white/10 rounded-xl">
+                <span className="text-slate-400 block text-[10px] uppercase font-bold">Tare Scale Weight</span>
+                <span className="font-mono font-bold text-slate-400 text-sm">{intake.warehouseTareWeight.toFixed(2)} kg</span>
+              </div>
+
+              <div className="p-3 bg-sky-500/10 border border-sky-500/30 rounded-xl">
+                <span className="text-sky-400 block text-[10px] uppercase font-bold">Warehouse Net Weight</span>
+                <span className="font-mono font-black text-sky-400 text-base">{netWeight.toFixed(2)} kg</span>
+              </div>
+            </div>
+
+            {/* Difference Banner */}
+            <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between text-xs">
+              <span className="font-bold text-slate-300">⚖️ Scale Difference (Warehouse Net vs Field Dispatch)</span>
+              <div className="flex items-center gap-3">
+                <span className={`font-mono font-extrabold text-sm ${diffKg >= 0 ? 'text-emerald-400' : 'text-amber-400'}`}>
+                  {diffKg >= 0 ? '+' : ''}{diffKg.toFixed(2)} kg
+                </span>
+                <span className={`font-mono font-extrabold text-xs px-2 py-0.5 rounded-full ${
+                  toleranceStatus === 'green' ? 'bg-emerald-500/20 text-emerald-300' :
+                  (toleranceStatus === 'yellow' ? 'bg-amber-500/20 text-amber-300' : 'bg-red-500/20 text-red-300')
+                }`}>
+                  ({diffKg >= 0 ? '+' : ''}{diffPercent.toFixed(2)}%)
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 4. SCALE DISPLAY PHOTOS */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Gross Scale Photo */}
+            <div className="p-3 bg-white/5 border border-white/10 rounded-xl space-y-2">
+              <span className="text-[10px] font-bold text-sky-400 uppercase flex items-center gap-1">
+                <Camera className="w-3.5 h-3.5" /> Gross Weight Scale Display Photo
+              </span>
+              {intake.grossScalePhotoUrl ? (
+                <a href={intake.grossScalePhotoUrl} target="_blank" rel="noreferrer">
+                  <img
+                    src={intake.grossScalePhotoUrl}
+                    alt="Gross Weight Scale Display"
+                    className="h-32 w-full object-cover rounded-lg border border-sky-500/30 hover:opacity-90 cursor-pointer"
+                  />
+                </a>
+              ) : (
+                <div className="h-32 flex items-center justify-center text-slate-500 italic text-[11px] bg-[#1e293b] rounded-lg">
+                  No Gross scale photo uploaded
+                </div>
+              )}
+            </div>
+
+            {/* Tare Scale Photo */}
+            <div className="p-3 bg-white/5 border border-white/10 rounded-xl space-y-2">
+              <span className="text-[10px] font-bold text-sky-400 uppercase flex items-center gap-1">
+                <Camera className="w-3.5 h-3.5" /> Tare Weight Scale Display Photo
+              </span>
+              {intake.tareScalePhotoUrl ? (
+                <a href={intake.tareScalePhotoUrl} target="_blank" rel="noreferrer">
+                  <img
+                    src={intake.tareScalePhotoUrl}
+                    alt="Tare Weight Scale Display"
+                    className="h-32 w-full object-cover rounded-lg border border-sky-500/30 hover:opacity-90 cursor-pointer"
+                  />
+                </a>
+              ) : (
+                <div className="h-32 flex items-center justify-center text-slate-500 italic text-[11px] bg-[#1e293b] rounded-lg">
+                  No Tare scale photo uploaded
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Assigned Cargo Manifest */}
+          <div className="space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <h4 className="font-extrabold text-xs text-slate-200 uppercase tracking-wider">
+                📦 Received Cargo Manifest ({purchases.length} Purchase Records)
+              </h4>
+              <button
+                onClick={exportTruckManifestCSV}
+                className="bg-emerald-600/90 hover:bg-emerald-600 text-white px-3 py-1 rounded-lg font-extrabold text-[11px] flex items-center gap-1.5 self-start sm:self-auto transition-colors"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5" /> Export {receivingIdFormatted} CSV
+              </button>
+            </div>
+
+            <div className="overflow-x-auto border border-white/10 rounded-xl">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-white/5 text-slate-400 uppercase font-bold border-b border-white/10">
+                  <tr>
+                    <th className="p-2.5">Purchase ID</th>
+                    <th className="p-2.5">Family Code</th>
+                    <th className="p-2.5">Farmer Name</th>
+                    <th className="p-2.5">Village</th>
+                    <th className="p-2.5">Variety / Grade</th>
+                    <th className="p-2.5 text-center">Sacks</th>
+                    <th className="p-2.5 text-right">Field Weight (kg)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {purchases.map((p: any) => {
+                    const item = p.items?.[0] || {};
+                    return (
+                      <tr key={p.id} className="hover:bg-white/5">
+                        <td className="p-2.5 font-mono font-bold text-sky-400">PR-2026-{p.id.slice(-6).toUpperCase()}</td>
+                        <td className="p-2.5 font-extrabold text-amber-400">{p.familyCode}</td>
+                        <td className="p-2.5 font-bold text-white">{p.farmerName}</td>
+                        <td className="p-2.5 text-slate-300">{p.village}</td>
+                        <td className="p-2.5 text-slate-300">{item.variety || 'Red Jasmine'} ({item.grade || 'A1'})</td>
+                        <td className="p-2.5 text-center font-bold text-white">{item.sacks || 0}</td>
+                        <td className="p-2.5 text-right font-mono font-bold text-sky-400">{p.totalWeight.toFixed(2)} kg</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

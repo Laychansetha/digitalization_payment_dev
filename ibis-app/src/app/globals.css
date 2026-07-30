@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ========================================================
+   OFFICIAL DEDICATED PAPER REPORT PRINT LAYOUT (@media print)
+   ======================================================== */
+@media print {
+  /* Set A4 portrait with zero margin to suppress default browser headers (URL, Title, Date, Page Number) */
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  /* Reset document background and margins */
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* 1. Hide everything on the underlying web application */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* 2. Hide on-screen UI components, fixed backdrop overlays, and headers */
+  .print\:hidden,
+  .fixed,
+  header,
+  nav,
+  footer,
+  aside {
+    display: none !important;
+  }
+
+  /* 3. Make ONLY the dedicated official print document visible */
+  .official-print-document,
+  .official-print-document * {
+    visibility: visible !important;
+  }
+
+  /* 4. Position the official paper document at top-left of printed page with internal document margins */
+  .official-print-document {
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 12mm 15mm 12mm 15mm !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    overflow: visible !important;
+  }
+
+  /* 5. Prevent page breaks inside table rows, images, and signature blocks */
+  tr, img, table, .avoid-break {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* 6. High quality print color rendering */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

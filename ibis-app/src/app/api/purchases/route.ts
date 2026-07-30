@@ -1,0 +1,122 @@
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { db } from '@/lib/db';
+
+export async function GET() {
+  try {
+    const purchases = await db.purchaseRecord.findMany({
+      include: {
+        items: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    return NextResponse.json(purchases);
+  } catch (error) {
+    console.error('Error fetching purchases:', error);
+    return NextResponse.json({ error: 'Failed to fetch purchase records.' }, { status: 500 });
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    const userId = (session?.user as { id?: string })?.id;
+    const userName = session?.user?.name || 'Purchasing Staff';
+
+    if (!session || !userId) {
+      return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const {
+      familyCode,
+      farmerName,
+      village,
+      items,
+      seedBorrowed,
+      seedDeduction,
+      signatureFarmer,
+      signatureStaff,
+      specsRecordId,
+    } = body;
+
+    if (!familyCode || !farmerName || !items || !Array.isArray(items) || items.length === 0) {
+      return NextResponse.json({ error: 'Family code, farmer name, and items are required.' }, { status: 400 });
+    }
+
+    const totalWeight = items.reduce((sum, item) => sum + (parseFloat(item.quantity) || 0), 0);
+    const grossPayment = items.reduce((sum, item) => sum + (parseFloat(item.totalValue) || 0), 0);
+
+    const sBorrowed = parseFloat(seedBorrowed) || 0;
+    const sDeduction = parseFloat(seedDeduction) || 0;
+    const sRepayment = sBorrowed * 1.1; // 10% seed interest
+    const netPayment = Math.max(0, grossPayment - sDeduction);
+
+    const purchase = await db.purchaseRecord.create({
+      data: {
+        familyCode: familyCode.toUpperCase().trim(),
+        farmerName: farmerName.trim(),
+        village: village || '',
+        totalWeight,
+        totalPayment: grossPayment,
+        seedBorrowed: sBorrowed,
+        seedRepayment: sRepayment,
+        seedDeduction: sDeduction,
+        netPayment,
+        signatureFarmer: signatureFarmer || null,
+        signatureStaff: signatureStaff || null,
+        purchasingStaffId: userId,
+        purchasingStaffName: userName,
+        specsRecordId: specsRecordId || null,
+        status: 'PENDING',
+        createdBy: userId,
+        items: {
+          create: items.map((item) => ({
+            variety: item.variety,
+            grade: item.grade || '',
+            standardPrice: parseFloat(item.standardPrice) || 0,
+            additionalPrice: parseFloat(item.additionalPrice) || 0,
+            finalPrice: parseFloat(item.finalPrice) || 0,
+            sacks: parseInt(item.sacks, 10) || 0,
+            quantity: parseFloat(item.quantity) || 0,
+            totalValue: parseFloat(item.totalValue) || 0,
+            sackWeights: Array.isArray(item.sackWeights) ? JSON.stringify(item.sackWeights) : item.sackWeights || null,
+          })),
+        },
+      },
+      include: {
+        items: true,
+      },
+    });
+
+    // Audit Log
+    await db.auditLog.create({
+      data: {
+        userId,
+        userName,
+        userRole: (session.user as { role: 'FIELD' | 'WAREHOUSE' | 'FINANCE' | 'ADMIN' }).role || 'FIELD',
+        action: 'CREATE',
+        entityType: 'PurchaseRecord',
+        entityId: purchase.id,
+        details: JSON.stringify({
+          familyCode,
+          farmerName,
+          totalWeight,
+          totalPayment: grossPayment,
+          netPayment,
+          purchasingStaff: userName,
+          sackCount: items[0]?.sacks || 0,
+          hasFarmerSignature: Boolean(signatureFarmer),
+          hasStaffSignature: Boolean(signatureStaff),
+          linkedSpecsId: specsRecordId || 'None',
+        }),
+      },
+    });
+
+    return NextResponse.json(purchase, { status: 201 });
+  } catch (error) {
+    console.error('Error creating purchase record:', error);
+    return NextResponse.json({ error: 'Failed to create purchase record.' }, { status: 500 });
+  }
+}

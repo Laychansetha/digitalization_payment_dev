@@ -1,46 +1,112 @@
-# IBIS Rice - Digitalization Payment & Field Operations Dev
+# 🌾 IBIS RICE CONSERVATION CO., LTD — Operations Portal
 
-Welcome to the **digitalization_payment_dev** repository. This project contains a suite of offline-ready, client-side web tools and reference documents designed to digitalize and streamline field operations, quality control, payments, and transport logistics for **IBIS Rice Conservation Co., Ltd.**
-
----
-
-## 📂 Repository Contents
-
-The workspace contains the following files:
-
-### 1. Interactive Tools (HTML/JS)
-*   **[paddy_purchase_invoice.html](file:///c:/Users/laych/Documents/digitalization_payment_dev/paddy_purchase_invoice.html)**: 
-    *   **Paddy Purchase Record**: Digital tool to record transactions with producers (Farmer name, Family code, Village), calculate paddy weights and prices across various grades, and automatically compute seed return deductions (at 10% interest/110% repayment weight).
-    *   **Transport Record & Logistics**: Integrates logistics tracking, allowing field staff to log loading date/time, driver details, truck plate numbers, and verify truck sanitation.
-    *   **Features**: Import purchase records directly to transport lists, print-ready layout styling, history logs saved in local storage, and CSV export capabilities.
-*   **[specs_checking_record.html](file:///c:/Users/laych/Documents/digitalization_payment_dev/specs_checking_record.html)**:
-    *   **Quality Inspection Tool**: Allows quality inspectors to measure and validate key quality specifications of paddy (Moisture %, Purity %, Impurities %, Broken Rice %, Whole Grain %, Foreign Matter %).
-    *   **Pricing Engine**: Automatically maps quality metrics to grading standards, looks up base pricing in real-time, and applies organic bonuses (+100 KHR/kg) to compute final purchase rates.
-    *   **Dashboard & History**: Displays key metrics (Total Samples, Pass Rate, Avg Price) and lists historical inspection entries with search, edit, sort, and CSV export functions.
-
-### 2. Reference Documents & Records
-*   **[paddy specification and price.pdf](file:///c:/Users/laych/Documents/digitalization_payment_dev/paddy%20specification%20and%20price.pdf)**: Official specification manual outlining quality thresholds, grading tiers, and purchase price frameworks.
-*   **[Paddy Purchased Record-2025.docx](file:///c:/Users/laych/Documents/digitalization_payment_dev/Paddy%20Purchased%20Record-2025.docx)**: Official template and log for recording purchase volumes and prices during the 2025 harvest season.
-*   **[Paddy Transport Record-2025.docx](file:///c:/Users/laych/Documents/digitalization_payment_dev/Paddy%20Transport%20Record-2025.docx)**: Log sheet and verification checklists for transport operations and shipping compliance in 2025.
+> **Integrated Field, Warehouse, & Finance Operations Web Application**  
+> Built with Next.js 16 (App Router), TypeScript, Prisma ORM, SQLite, and NextAuth.js.
 
 ---
 
-## ⚡ Key Technical Features of the Web Apps
+## 🖥️ Environment Architecture & Workflow
 
-*   **100% Offline-Ready**: Designed for remote agricultural fields. All data is processed on the client side, using the browser's `localStorage` for data persistence.
-*   **Tailored UI/UX**: Styled with an elegant dark theme using modern typography (Inter font), grid systems, responsive flex layouts, CSS variables, and clean interactive elements (modals, toasts, transitions).
-*   **CSV Exports**: Supports exporting recorded transactions/inspections directly to `.csv` files for backend database imports or Excel analysis.
-*   **Print Optimization**: Styled with print media queries (`@media print`) so field operators can print clean invoice receipts and records to physical paper.
+| Environment | Machine | Purpose & Workflow | Network Access |
+| :--- | :--- | :--- | :--- |
+| 💻 **Development** | **Primary Dev PC** (`digitalization_payment_dev`) | Feature development, bug fixes, UI/API enhancements, and local unit testing. | `http://localhost:3000` |
+| 🧪 **Testing / UAT** | **Secondary Desktop Computer** | Stable testing environment for multi-user team testing (Field, Warehouse, Finance, Admin). | `http://<UAT_SERVER_IP>:3000` |
+
+### Deployment Lifecycle:
+1. **Develop on Primary PC**: All new feature requests, schema changes, and UI improvements are implemented and verified locally on this PC.
+2. **Local Verification**: Execute `npm run build` to confirm type safety and zero compilation warnings.
+3. **Deploy to UAT Server**: Once feature milestones are approved, code changes are committed and deployed to the secondary desktop computer for team User Acceptance Testing (UAT).
 
 ---
 
-## 🚀 How to Run Locally
+## 🌐 Local Network (Wi-Fi / LAN) UAT Deployment Guide
 
-Since these are pure client-side applications (HTML/CSS/JS), **no server setup or installation is required**.
+Follow these steps when updating or deploying to the secondary testing desktop computer:
 
-1. Clone or download this repository.
-2. Double-click either **`paddy_purchase_invoice.html`** or **`specs_checking_record.html`** to open it in any modern web browser (Chrome, Edge, Safari, Firefox).
-3. (Optional) Run a lightweight local server if preferred:
-   ```bash
-   npx serve .
+### 1. Prerequisites (Host Server Computer)
+- **Operating System**: Windows 10 / 11 (64-bit)
+- **Node.js**: Version 18 LTS or higher ([Download Node.js](https://nodejs.org/))
+- **Network**: Connected to local Wi-Fi or LAN router
+
+---
+
+### 2. Quick One-Click Setup
+
+1. **Clone or Copy Repository**:
+   Copy the project folder to your host Windows desktop computer.
+
+2. **Initialize Database**:
+   Double-click `setup-database.bat` (or run in Command Prompt):
+   ```cmd
+   cd ibis-app
+   npm install
+   npx prisma db push
+   npx tsx prisma/seed.ts
    ```
+
+3. **Start the Production Server**:
+   Double-click `start-server.bat` (or run in Command Prompt):
+   ```cmd
+   cd ibis-app
+   npm run build
+   npm run start
+   ```
+   The server will start listening on `http://0.0.0.0:3000`.
+
+---
+
+### 3. Windows Firewall Configuration
+
+To allow other computers on the same network to connect, run the following command in **Command Prompt (Admin)**:
+
+```cmd
+netsh advfirewall firewall add rule name="IBIS RICE App" dir=in action=allow protocol=TCP localport=3000
+```
+
+---
+
+### 4. How to Connect from Other Devices
+
+1. **Find Server IP Address**:
+   On the host Windows computer, open Command Prompt and type:
+   ```cmd
+   ipconfig
+   ```
+   Look for your **IPv4 Address** (e.g. `192.168.1.15`).
+
+2. **Access from Field Tablets / Desktop Computers**:
+   On any phone, tablet, or PC connected to the same Wi-Fi/LAN, open a browser and navigate to:
+   ```text
+   http://<SERVER_IP>:3000
+   ```
+   *Example*: `http://192.168.1.15:3000`
+
+---
+
+## 👥 Default User Accounts
+
+| Role | Username / Email | Password | Allowed Modules |
+| :--- | :--- | :--- | :--- |
+| 🌾 **Field Staff** | `field@ibisrice.com` | `Ibis2026!` | Field Operations Only |
+| 🏬 **Warehouse Staff** | `warehouse@ibisrice.com` | `Ibis2026!` | Warehouse Receiving Only |
+| 💳 **Finance Staff** | `finance@ibisrice.com` | `Ibis2026!` | Finance Verification Only |
+| ⚙️ **System Admin** | `admin@ibisrice.com` | `Ibis2026!` | Full Access to All 4 Modules |
+
+---
+
+## 🔑 Login & Role Verification System
+
+- Users select their target role using the **Quick Select Role** selector on the login page.
+- Users **must** enter their assigned **Username** and **Password**.
+- The authentication provider checks:
+  1. Username exists and password matches (`bcrypt`).
+  2. User account status is `ACTIVE`.
+  3. The selected role matches the user's assigned role in the database.
+- System Admin can create new accounts, edit roles, toggle Active/Inactive status, and reset passwords in **Admin Master Settings → User Accounts**.
+
+---
+
+## 📄 License & Contact
+
+**IBIS RICE CONSERVATION CO., LTD**  
+Phnom Penh / Preah Vihear, Cambodia.
