@@ -50,6 +50,26 @@ model Bank {
   createdAt DateTime @default(now())
 }
 
+model LocationRegistry {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  type      String   // BUYING_STATION, WAREHOUSE, EXPORT_TERMINAL
+  code      String?
+  address   String?
+  status    String   @default("ACTIVE")
+  createdAt DateTime @default(now())
+}
+
+model FleetVehicle {
+  id          String   @id @default(cuid())
+  plateNumber String   @unique
+  driverName  String
+  driverPhone String?
+  maxWeightKg Float?
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now())
+}
+
 model PaddyPriceSpec {
   id               String   @id @default(cuid())
   variety          String
@@ -128,6 +148,8 @@ model PurchaseRecord {
   seedBorrowed        Float            @default(0)
   seedRepayment       Float            @default(0)
   seedDeduction       Float            @default(0)
+  premiumDescription  String?
+  additionalPremium   Float            @default(0)
   netPayment          Float
   signatureFarmer     String?          // Digital electronic signature of farmer
   signatureStaff      String?          // Staff signature / verification
