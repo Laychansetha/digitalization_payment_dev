@@ -5,17 +5,14 @@
 
 set -e
 
-echo "[1/4] Entering ibis-app directory..."
-cd "$(dirname "$0")/ibis-app"
-
-echo "[2/4] Ensuring public/uploads directory exists..."
+echo "[1/3] Ensuring public/uploads directory exists..."
 mkdir -p public/uploads
 
-echo "[3/4] Running Prisma database migration and seed..."
+echo "[2/3] Running Prisma database migration and seed..."
 npx prisma db push --skip-generate
 npx tsx prisma/seed.ts
 
-echo "[4/4] Building Next.js production bundle..."
+echo "[3/3] Building Next.js production bundle..."
 npm run build
 
 echo "======================================================================"

@@ -1,112 +1,148 @@
-# 🌾 IBIS RICE CONSERVATION CO., LTD — Operations Portal
+# IBIS RICE — Operations Portal (Field, Warehouse & Finance)
 
-> **Integrated Field, Warehouse, & Finance Operations Web Application**  
-> Built with Next.js 16 (App Router), TypeScript, Prisma ORM, SQLite, and NextAuth.js.
-
----
-
-## 🖥️ Environment Architecture & Workflow
-
-| Environment | Machine | Purpose & Workflow | Network Access |
-| :--- | :--- | :--- | :--- |
-| 💻 **Development** | **Primary Dev PC** (`digitalization_payment_dev`) | Feature development, bug fixes, UI/API enhancements, and local unit testing. | `http://localhost:3000` |
-| 🧪 **Testing / UAT** | **Secondary Desktop Computer** | Stable testing environment for multi-user team testing (Field, Warehouse, Finance, Admin). | `http://<UAT_SERVER_IP>:3000` |
-
-### Deployment Lifecycle:
-1. **Develop on Primary PC**: All new feature requests, schema changes, and UI improvements are implemented and verified locally on this PC.
-2. **Local Verification**: Execute `npm run build` to confirm type safety and zero compilation warnings.
-3. **Deploy to UAT Server**: Once feature milestones are approved, code changes are committed and deployed to the secondary desktop computer for team User Acceptance Testing (UAT).
+A production-grade, offline-first digital payment and supply chain management web application built for **IBIS RICE CONSERVATION CO., LTD**.
 
 ---
 
-## 🌐 Local Network (Wi-Fi / LAN) UAT Deployment Guide
+## 🏗️ Architecture Overview
 
-Follow these steps when updating or deploying to the secondary testing desktop computer:
+The system operates in a **dual-mode hybrid architecture**:
 
-### 1. Prerequisites (Host Server Computer)
-- **Operating System**: Windows 10 / 11 (64-bit)
-- **Node.js**: Version 18 LTS or higher ([Download Node.js](https://nodejs.org/))
-- **Network**: Connected to local Wi-Fi or LAN router
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        IBIS RICE WEB APPLICATION                       │
+└────────────────────────────────────────────────────────────────────────┘
+                                    │
+           ┌────────────────────────┴────────────────────────┐
+           ▼                                                 ▼
+┌──────────────────────────────┐          ┌──────────────────────────────┐
+│       FIELD OPERATIONS       │          │     WAREHOUSE & FINANCE      │
+│        (Offline-First)       │          │        (Online-Only)       │
+├──────────────────────────────┤          ├──────────────────────────────┤
+│ • Specs Record               │          │ • Warehouse Intake & Scale   │
+│ • Farmer Payment Info        │          │ • Finance Reconciliation     │
+│ • Purchase Record & Sacks    │          │ • Admin & Master Specs/Banks │
+│ • Transport Dispatch         │          │ • Audit Logs & System Config │
+├──────────────────────────────┤          ├──────────────────────────────┤
+│ 💾 Persistent IndexedDB      │          │ 🌐 Direct PostgreSQL API     │
+│ 📷 Base64 Photo Storage      │          │ 📊 Real-Time Server Queries  │
+│ ✍️ Electronic Signatures     │          │                             │
+│ 🖨️ Local Receipt Printing    │          │                             │
+│ ⚡ Auto & Manual Sync        │          │                             │
+└──────────────────────────────┘          └──────────────────────────────┘
+```
+
+1. **Field Operations (Offline-First Engine)**:
+   - Covers: Quality Specs, Farmer Payment Profiles, Purchase Invoices, and Truck Transport Dispatch.
+   - Saves all records immediately to browser IndexedDB (`ibis_rice_field_offline_v3`).
+   - Photos (bank document passbooks) and farmer signatures are preserved as Base64 strings. Unsynced records survive browser refreshes and computer restarts.
+   - Synchronizes with central PostgreSQL automatically when internet becomes available without duplicate creation.
+2. **Warehouse & Finance (Online-Only)**:
+   - Connects directly to central PostgreSQL server for real-time scale variance calculations, finance payment approvals, and audit logging.
 
 ---
 
-### 2. Quick One-Click Setup
+## 📁 Directory Structure
 
-1. **Clone or Copy Repository**:
-   Copy the project folder to your host Windows desktop computer.
-
-2. **Initialize Database**:
-   Double-click `setup-database.bat` (or run in Command Prompt):
-   ```cmd
-   cd ibis-app
-   npm install
-   npx prisma db push
-   npx tsx prisma/seed.ts
-   ```
-
-3. **Start the Production Server**:
-   Double-click `start-server.bat` (or run in Command Prompt):
-   ```cmd
-   cd ibis-app
-   npm run build
-   npm run start
-   ```
-   The server will start listening on `http://0.0.0.0:3000`.
-
----
-
-### 3. Windows Firewall Configuration
-
-To allow other computers on the same network to connect, run the following command in **Command Prompt (Admin)**:
-
-```cmd
-netsh advfirewall firewall add rule name="IBIS RICE App" dir=in action=allow protocol=TCP localport=3000
+```text
+digitalization_payment_dev/
+├── prisma/
+│   ├── schema.prisma              # Active Prisma ORM database schema
+│   ├── schema.postgresql.prisma   # PostgreSQL production schema template
+│   └── seed.ts                    # Database initialization & seed script
+├── public/
+│   ├── logo.png                   # Official IBIS Rice logo
+│   ├── sw.js                      # PWA Service Worker offline caching script
+│   └── uploads/                   # Uploaded bank passbooks & scale photos
+├── src/
+│   ├── app/
+│   │   ├── api/                   # REST API routes (specs, farmers, purchases, transport, warehouse, finance, admin)
+│   │   ├── layout.tsx             # Root layout & PWA provider wrapper
+│   │   ├── page.tsx               # Main multi-role operations dashboard UI
+│   │   └── globals.css            # Tailored dark-mode UI design system
+│   ├── components/                # Modular UI modals & details components
+│   │   ├── OfflineQueueModal.tsx  # Header sync drawer modal
+│   │   ├── PrintReceiptModal.tsx  # Printable purchase receipt component
+│   │   ├── PrintManifestModal.tsx # Printable transport manifest component
+│   │   └── ...
+│   └── lib/
+│       ├── db.ts                  # Shared PrismaClient instance
+│       ├── offline-sync.ts        # IndexedDB offline store & background sync engine
+│       └── auth.ts                # NextAuth credential authentication options
+├── .env                           # Environment configuration file
+├── .env.example                   # Environment configuration template
+├── start-production-local.bat     # One-click Windows local production server launcher
+├── switch-to-postgresql.bat       # One-click script to configure PostgreSQL (ibis_db)
+├── start-production.sh            # Linux / AWS Lightsail production startup script
+├── package.json                   # Dependencies and npm scripts
+└── README.md                      # System documentation
 ```
 
 ---
 
-### 4. How to Connect from Other Devices
+## 🚀 Quick Start Guide
 
-1. **Find Server IP Address**:
-   On the host Windows computer, open Command Prompt and type:
+### Prerequisites
+- **Node.js**: v18.0.0 or higher
+- **PostgreSQL**: (Required for production desktop testing / AWS Lightsail deployment)
+
+### 1. Installation
+Clone or extract the project directory and install node dependencies:
+```bash
+npm install
+```
+
+---
+
+### 2. Running Locally (Development Mode — SQLite)
+For rapid local testing with built-in SQLite database:
+```bash
+npx prisma db push
+npx tsx prisma/seed.ts
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+### 3. Deploying / Running on Target Desktop (PostgreSQL Production)
+
+To run as a full local production server connected to your PostgreSQL database (`ibis_db`):
+
+1. **One-Click Automated Setup (Windows)**:
+   Simply double-click:
    ```cmd
-   ipconfig
+   switch-to-postgresql.bat
    ```
-   Look for your **IPv4 Address** (e.g. `192.168.1.15`).
+   *This automatically configures `.env` with your password (`PostgreSQLSetha*1789`), syncs the database tables, seeds default accounts, compiles the Webpack production bundle, and starts the server on `http://localhost:3000`!*
 
-2. **Access from Field Tablets / Desktop Computers**:
-   On any phone, tablet, or PC connected to the same Wi-Fi/LAN, open a browser and navigate to:
-   ```text
-   http://<SERVER_IP>:3000
+2. **Manual Production Launch**:
+   ```cmd
+   start-production-local.bat
    ```
-   *Example*: `http://192.168.1.15:3000`
 
 ---
 
-## 👥 Default User Accounts
+## 🔐 Default Pre-Configured User Accounts
 
-| Role | Username / Email | Password | Allowed Modules |
-| :--- | :--- | :--- | :--- |
-| 🌾 **Field Staff** | `field@ibisrice.com` | `Ibis2026!` | Field Operations Only |
-| 🏬 **Warehouse Staff** | `warehouse@ibisrice.com` | `Ibis2026!` | Warehouse Receiving Only |
-| 💳 **Finance Staff** | `finance@ibisrice.com` | `Ibis2026!` | Finance Verification Only |
-| ⚙️ **System Admin** | `admin@ibisrice.com` | `Ibis2026!` | Full Access to All 4 Modules |
+All default accounts are initialized with password **`Ibis2026!`**:
 
----
-
-## 🔑 Login & Role Verification System
-
-- Users select their target role using the **Quick Select Role** selector on the login page.
-- Users **must** enter their assigned **Username** and **Password**.
-- The authentication provider checks:
-  1. Username exists and password matches (`bcrypt`).
-  2. User account status is `ACTIVE`.
-  3. The selected role matches the user's assigned role in the database.
-- System Admin can create new accounts, edit roles, toggle Active/Inactive status, and reset passwords in **Admin Master Settings → User Accounts**.
+| Role | Username | Permissions & Scope |
+|---|---|---|
+| **System Administrator** | `admin` | Full access across Field, Warehouse, Finance, User Mgmt & Price Specs |
+| **Field Inspector** | `field` | Field Operations (Specs, Farmer Profiles, Purchases, Transport Dispatch) |
+| **Warehouse Officer** | `warehouse` | Warehouse Receiving, Gross/Tare Scale Intake & Scale Variance Audit |
+| **Finance Officer** | `finance` | Finance Truck Verification, Bank Bulk Transfers & Disbursement |
 
 ---
 
-## 📄 License & Contact
+## ☁️ AWS Lightsail Deployment Ready
 
-**IBIS RICE CONSERVATION CO., LTD**  
-Phnom Penh / Preah Vihear, Cambodia.
+This application is ready to deploy to AWS Lightsail or any Linux VPS:
+1. Copy this folder to your Linux server instance.
+2. Edit `.env` with your production `DATABASE_URL` and `NEXTAUTH_SECRET`.
+3. Make the launcher executable and run:
+   ```bash
+   chmod +x start-production.sh
+   ./start-production.sh
+   ```
